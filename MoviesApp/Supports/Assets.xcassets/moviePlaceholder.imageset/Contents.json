@@ -1,0 +1,15 @@
+{
+  "images" : [
+    {
+      "filename" : "photo_2021-07-28 21.58.52.jpeg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "preserves-vector-representation" : true
+  }
+}
