@@ -24,19 +24,6 @@ final class MovieOverviewTableViewCell: UITableViewCell {
         setupOverviewLabel()
     }
 
-    // MARK: - Public Methods
-
-    func configureCell(movieInfo: MovieInfo?) {
-        guard let overview = movieInfo?.overview else { return }
-        overviewLabel.text = overview
-        guard let tagline = movieInfo?.tagline else { return }
-        if tagline.isEmpty {
-            overviewTitleLabel.text = "Описание фильма"
-            return
-        }
-        overviewTitleLabel.text = tagline
-    }
-
     // MARK: - Private Methods
 
     private func setupOverviewTitleLabel() {
@@ -55,5 +42,20 @@ final class MovieOverviewTableViewCell: UITableViewCell {
             overviewLabel.trailingAnchor.constraint(equalTo: overviewTitleLabel.trailingAnchor),
             overviewLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -15),
         ])
+    }
+}
+
+// MARK: - MovieInfoCellProtocol
+
+extension MovieOverviewTableViewCell: MovieInfoCellProtocol {
+    func configureCell(movieInfo: MovieInfo?) {
+        guard let overview = movieInfo?.overview else { return }
+        overviewLabel.text = overview
+        guard let tagline = movieInfo?.tagline else { return }
+        if tagline.isEmpty {
+            overviewTitleLabel.text = "Описание фильма"
+            return
+        }
+        overviewTitleLabel.text = tagline
     }
 }

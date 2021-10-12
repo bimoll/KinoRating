@@ -31,17 +31,6 @@ final class MovieRatingTableViewCell: UITableViewCell {
         setupRatingLabelConstraints()
     }
 
-    // MARK: - Public Properties
-
-    func configureCell(movieInfo: MovieInfo?) {
-        guard let rating = movieInfo?.voteAverage else { return }
-        guard let titleText = movieInfo?.title else { return }
-        titleLable.text = titleText
-        popularityLabel.text = "Рейтинг: \(rating)"
-        guard let voteCount = movieInfo?.voteCount else { return }
-        voteCountLabel.text = "\(voteCount) оценки"
-    }
-
     // MARK: - Private Methods
 
     private func setupTitleLabelConstraints() {
@@ -88,5 +77,18 @@ final class MovieRatingTableViewCell: UITableViewCell {
             voteCountLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
             voteCountLabel.leadingAnchor.constraint(equalTo: voteCountImageView.trailingAnchor, constant: 20),
         ])
+    }
+}
+
+// MARK: - MovieInfoCellProtocol
+
+extension MovieRatingTableViewCell: MovieInfoCellProtocol {
+    func configureCell(movieInfo: MovieInfo?) {
+        guard let rating = movieInfo?.voteAverage else { return }
+        guard let titleText = movieInfo?.title else { return }
+        titleLable.text = titleText
+        popularityLabel.text = "Рейтинг: \(rating)"
+        guard let voteCount = movieInfo?.voteCount else { return }
+        voteCountLabel.text = "\(voteCount) оценки"
     }
 }

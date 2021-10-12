@@ -115,6 +115,8 @@ extension MovieDetailView: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        var identifier: String
+
         switch indexPath.row {
         case 0:
             guard let cell = tableView
@@ -127,35 +129,20 @@ extension MovieDetailView: UITableViewDataSource {
             cell.selectionStyle = .none
             return cell
         case 1:
-            guard let cell = tableView
-                .dequeueReusableCell(
-                    withIdentifier: LocalConstants
-                        .identifierMovieRatingTableViewCell
-                ) as? MovieRatingTableViewCell
-            else { return UITableViewCell() }
-            cell.configureCell(movieInfo: movieInfo)
-            cell.selectionStyle = .none
-            return cell
+            identifier = LocalConstants.identifierMovieRatingTableViewCell
         case 2:
-            guard let cell = tableView
-                .dequeueReusableCell(
-                    withIdentifier: LocalConstants.identifierMovieReleaseInfoTableViewCell
-                ) as? MovieReleaseInfoTableViewCell
-            else { return UITableViewCell() }
-            cell.configureCell(movieInfo: movieInfo)
-            cell.selectionStyle = .none
-            return cell
+            identifier = LocalConstants.identifierMovieReleaseInfoTableViewCell
         case 3:
-            guard let cell = tableView
-                .dequeueReusableCell(
-                    withIdentifier: LocalConstants.identifierMovieOverviewTableViewCell
-                ) as? MovieOverviewTableViewCell
-            else { return UITableViewCell() }
-            cell.configureCell(movieInfo: movieInfo)
-            cell.selectionStyle = .none
-            return cell
+            identifier = LocalConstants.identifierMovieOverviewTableViewCell
         default:
             return UITableViewCell()
         }
+
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: identifier) as? MovieInfoCellProtocol else {
+            return UITableViewCell()
+        }
+        cell.configureCell(movieInfo: movieInfo)
+        cell.selectionStyle = .none
+        return cell
     }
 }

@@ -41,20 +41,6 @@ final class MovieReleaseInfoTableViewCell: UITableViewCell {
         setupGanresLabelConstraints()
     }
 
-    // MARK: - Public Methods
-
-    func configureCell(movieInfo: MovieInfo?) {
-        guard let duration = movieInfo?.runtime else { return }
-        durationLabel.text = "\(duration) минут(ы)"
-
-        guard let ganres = movieInfo?.genres else { return }
-        var ganresString = ""
-        ganres.forEach { ganresString += "\n\($0.name ?? "")" }
-        ganresLabel.text = ganresString
-
-        setupDurationImageViewConstraints()
-    }
-
     // MARK: - Private Methods
 
     private func setupDurationTitleLabelConstraints() {
@@ -73,9 +59,6 @@ final class MovieReleaseInfoTableViewCell: UITableViewCell {
             durationImageView.heightAnchor.constraint(equalToConstant: 30),
             durationImageView.widthAnchor.constraint(equalTo: durationTitleLabel.heightAnchor, multiplier: 1),
         ])
-
-//        guard let count = ganresLabel.text?.count, count < 15 else { return }
-//        durationImageView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -25).isActive = true
     }
 
     private func setupDurationLabelConstraints() {
@@ -112,5 +95,21 @@ final class MovieReleaseInfoTableViewCell: UITableViewCell {
             ganresLabel.leadingAnchor.constraint(equalTo: ganrerImageView.trailingAnchor, constant: 20),
             ganresLabel.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -15),
         ])
+    }
+}
+
+// MARK: - MovieInfoCellProtocol
+
+extension MovieReleaseInfoTableViewCell: MovieInfoCellProtocol {
+    func configureCell(movieInfo: MovieInfo?) {
+        guard let duration = movieInfo?.runtime else { return }
+        durationLabel.text = "\(duration) минут(ы)"
+
+        guard let ganres = movieInfo?.genres else { return }
+        var ganresString = ""
+        ganres.forEach { ganresString += "\n\($0.name ?? "без жанра")" }
+        ganresLabel.text = ganresString
+
+        setupDurationImageViewConstraints()
     }
 }
