@@ -24,42 +24,62 @@ final class MovieCollectionViewCell: UICollectionViewCell {
         return label
     }()
 
+    // MARK: - Private Properties
+
+    private var viewData: ViewData<UIImage> = .loading {
+        didSet {
+            setNeedsLayout()
+        }
+    }
+
     // MARK: - UICollectionViewCell(MovieCollectionViewCell)
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        moviePosterImageView.image = UIImage(named: "moviePlaceholder")
+        moviePosterImageView.image = nil
     }
 
-    // MARK: - Public Properties
-
-    var getImageCompletion: ((String?, @escaping (UIImage?) -> ()) -> ())?
+    override func layoutSubviews() {
+        switch viewData {
+        case .loading:
+            addShimmerAnimation()
+        case let .data(image):
+            setImage(image)
+        case .error, .noData:
+            setImage(UIImage(named: "moviePlaceholder"))
+        }
+    }
 
     // MARK: - Private Properties
 
     private lazy var views: [UIView] = [moviePosterImageView, movieTitleLabel]
+    private var viewModel = MovieCellViewModel()
 
     // MARK: - Public Methods
 
     func configureCell(movie: Movie) {
+        updateCell()
+
         layer.cornerRadius = 10
-        backgroundColor = UIColor(named: "CustomDarkGray")
         views.forEach { addSubview($0) }
-        setupMoviePosterImageView(posterPath: movie.posterPath)
+        setupMoviePosterImageViewConstraints()
+        viewModel.showPosterImage(path: movie.posterPath)
         setupMovieTitleLabel(title: movie.title)
     }
 
     // MARK: - Private Methods
 
-    private func setupMoviePosterImageView(posterPath: String?) {
-        setupMoviePosterImageViewConstraints()
-        getImageCompletion?(posterPath) { [weak self] image in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                self.moviePosterImageView.image = image
-                self.backgroundColor = .black
-            }
+    private func updateCell() {
+        viewModel.updateViewData = { [weak self] viewData in
+            guard let self = self else { return }
+            self.viewData = viewData
         }
+    }
+
+    private func setImage(_ image: UIImage?) {
+        layer.sublayers?.filter { $0 is CAGradientLayer }.forEach { $0.removeFromSuperlayer() }
+        moviePosterImageView.image = image
+        backgroundColor = UIColor(named: "CustomBlack")
     }
 
     private func setupMovieTitleLabel(title: String?) {
