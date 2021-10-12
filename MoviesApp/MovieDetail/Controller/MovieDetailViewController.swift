@@ -49,7 +49,7 @@ final class MovieDetailViewController: UIViewController {
     }
 
     private func failure() {
-        showMessageAlert(title: "Нет подключения к интернету", message: "Попробовать еще?") {
+        showLoadingErrorAlert(title: "Нет подключения к интернету", message: "Попробовать еще?") {
             self.getMoviesInfo(id: self.movieID)
         }
     }

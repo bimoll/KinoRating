@@ -24,42 +24,61 @@ final class MovieCollectionViewCell: UICollectionViewCell {
         return label
     }()
 
+    // MARK: - Private Properties
+
+    private var viewData: ViewData<UIImage> = .loading {
+        didSet {
+            fetchUpdates()
+        }
+    }
+
     // MARK: - UICollectionViewCell(MovieCollectionViewCell)
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        moviePosterImageView.image = UIImage(named: "moviePlaceholder")
+        moviePosterImageView.image = nil
     }
-
-    // MARK: - Public Properties
-
-    var getImageCompletion: ((String?, @escaping (UIImage?) -> ()) -> ())?
 
     // MARK: - Private Properties
 
     private lazy var views: [UIView] = [moviePosterImageView, movieTitleLabel]
+    private let viewModel = MovieCellViewModel()
 
     // MARK: - Public Methods
 
     func configureCell(movie: Movie) {
         layer.cornerRadius = 10
-        backgroundColor = UIColor(named: "CustomDarkGray")
         views.forEach { addSubview($0) }
         setupMoviePosterImageView(posterPath: movie.posterPath)
         setupMovieTitleLabel(title: movie.title)
     }
 
+    func fetchUpdates() {
+        switch viewData {
+        case .loading:
+            addShimmerAnimation()
+        case let .data(image):
+            moviePosterImageView.image = image
+            backgroundColor = UIColor(named: "CustomDarkGray")
+        case .error, .noData:
+            moviePosterImageView.image = UIImage(named: "moviePlaceholder")
+            backgroundColor = UIColor(named: "CustomDarkGray")
+        }
+    }
+
     // MARK: - Private Methods
+
+    private func updateCell() {
+        viewModel.updateViewData = { [weak self] viewData in
+            guard let self = self else { return }
+            self.viewData = viewData
+        }
+    }
 
     private func setupMoviePosterImageView(posterPath: String?) {
         setupMoviePosterImageViewConstraints()
-        getImageCompletion?(posterPath) { [weak self] image in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                self.moviePosterImageView.image = image
-                self.backgroundColor = .black
-            }
-        }
+        viewModel.showPosterImage(path: posterPath)
+        updateCell()
     }
 
     private func setupMovieTitleLabel(title: String?) {

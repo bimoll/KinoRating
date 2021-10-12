@@ -77,32 +77,22 @@ final class MoviesListViewController: UIViewController {
         return stackView
     }()
 
+    private lazy var safeAreaGuide = view.safeAreaLayoutGuide
+    private lazy var views: [UIView] = [moviesCollectionView, categoriesScrollView, searchTextField]
+
     // MARK: - Private Properties
 
     private let networkManager = NetworkService()
-    private let cacheImageService = CacheImageService()
+    private var viewModel: MovieListViewModelProtocol = MovieListViewModel()
+    private var viewData: ViewData<[Movie]> = .loading {
+        didSet {
+            fetchUpdates()
+        }
+    }
 
     private enum LocalConstants {
         static let identifierMovieCollectionViewCell = "MovieCollectionViewCell"
         static let identifierFooterView = "FooterView"
-    }
-
-    private lazy var safeAreaGuide = view.safeAreaLayoutGuide
-    private lazy var views: [UIView] = [moviesCollectionView, categoriesScrollView, searchTextField]
-
-    private lazy var movies: [Movie] = [] {
-        didSet {
-            moviesCollectionView.reloadData()
-        }
-    }
-
-    private var nextPageNumber = 1
-
-    private lazy var moviesCategories: MoviesCategories = .popular {
-        didSet {
-            movies = []
-            getMoviesPage(urlString: moviesCategories.getUrlString(page: 1))
-        }
     }
 
     // MARK: - UIViewController(MoviesListViewController)
@@ -111,6 +101,12 @@ final class MoviesListViewController: UIViewController {
         super.viewDidLoad()
 
         setupView()
+        viewModel.startLoadingAnimations = { [weak self] in
+            self?.spinner.startAnimating()
+        }
+        viewModel.reloadCollection = { [weak self] in
+            self?.moviesCollectionView.reloadData()
+        }
     }
 
     // MARK: - Actions
@@ -121,7 +117,7 @@ final class MoviesListViewController: UIViewController {
             let categories = MoviesCategories(rawValue: title)
         else { return }
         navigationItem.title = "\(title) Movies"
-        moviesCategories = categories
+        viewModel.setCurrentCategory(categories)
         searchTextField.text = ""
 
         categoriesButtons.forEach { button in
@@ -154,92 +150,30 @@ final class MoviesListViewController: UIViewController {
             }
         categoriesButtons.first?.backgroundColor = .darkGray
 
-        getMoviesPage(urlString: moviesCategories.getUrlString(page: nextPageNumber))
+        updateView()
     }
 
-    private func searchMovies(_ textField: UITextField, isPaginate: Bool) {
-        let page = isPaginate ? nextPageNumber : 1
-
-        if textField.hasText, let text = textField.text?.replacingOccurrences(of: " ", with: "%20") {
-            if !isPaginate { movies = [] }
-            getMoviesPage(urlString: Constants.getSearchMoviesURLString(page: page, searchedText: text))
-        } else {
-            if !isPaginate {
-                setCurrentCategoriesMovies()
-                return
+    private func fetchUpdates() {
+        let urlString = viewModel.getCurrentCategory().getUrlString(page: 1)
+        switch viewData {
+        case .loading:
+            viewModel.getMoviesPage(urlString)
+        case let .data(movies):
+            viewModel.movies.append(contentsOf: movies)
+        case let .error(error):
+            showLoadingErrorAlert(title: "Ошибка!", message: error.localizedDescription) {
+                self.viewModel.getMoviesPage(urlString)
             }
-
-            let urlString = moviesCategories.getUrlString(page: page)
-            getMoviesPage(urlString: urlString)
+        case .noData: break
         }
     }
 
-    private func showPosterImage(path: String?, completion: @escaping (UIImage?) -> ()) {
-        let posterURLString = Constants.getPosterURLString(path: path ?? "")
-
-        if let image = cacheImageService.getImageFromCache(url: posterURLString) {
-            completion(image)
-            return
-        }
-
-        guard let posterURL = URL(string: posterURLString) else {
-            completion(nil)
-            return
-        }
-
-        networkManager.downloadImage(url: posterURL) { [weak self] result in
+    private func updateView() {
+        viewModel.updateViewData = { [weak self] viewData in
             guard let self = self else { return }
-            switch result {
-            case let .success(data):
-                guard let data = data, let image = UIImage(data: data) else { return }
-                self.cacheImageService.saveImageToCache(url: posterURLString, image: image)
-                completion(image)
-            case .failure:
-                completion(nil)
-            }
+            self.viewData = viewData
+            self.spinner.stopAnimating()
         }
-    }
-
-    private func getMoviesPage(urlString: String) {
-        if nextPageNumber == 1 { movies = [] }
-        spinner.startAnimating()
-        networkManager
-            .getMoviesPage(urlString: urlString) { [weak self] result in
-                guard let self = self else { return }
-                switch result {
-                case let .success(page):
-                    self.appendNewMovies(page?.results)
-                    self.setNextPageNumber(page)
-                case let .failure(error):
-                    print(error)
-                }
-                self.spinner.stopAnimating()
-            }
-    }
-
-    private func setNextPageNumber(_ page: MoviesListPage?) {
-        guard
-            let currentPageNumber = page?.page,
-            let totalPages = page?.totalPages,
-            currentPageNumber < totalPages
-        else {
-            nextPageNumber = -1
-            return
-        }
-        nextPageNumber = currentPageNumber + 1
-    }
-
-    private func setCurrentCategoriesMovies() {
-        for button in categoriesButtons where button.backgroundColor != .black {
-            guard let title = button.titleLabel?.text,
-                  let moviesCategories = MoviesCategories(rawValue: title) else { return }
-            self.moviesCategories = moviesCategories
-        }
-    }
-
-    private func appendNewMovies(_ movies: [Movie]?) {
-        guard let newMovies = movies else { return }
-        self.movies.append(contentsOf: newMovies)
     }
 
     private func configureNavigationBar() {
@@ -301,7 +235,7 @@ final class MoviesListViewController: UIViewController {
 
 extension MoviesListViewController: UICollectionViewDataSource {
     func collectionView(_: UICollectionView, numberOfItemsInSection _: Int) -> Int {
-        movies.count
+        viewModel.movies.count
     }
 
     func collectionView(
@@ -312,8 +246,7 @@ extension MoviesListViewController: UICollectionViewDataSource {
             withReuseIdentifier: LocalConstants.identifierMovieCollectionViewCell,
             for: indexPath
         ) as? MovieCollectionViewCell else { return UICollectionViewCell() }
-        cell.getImageCompletion = showPosterImage(path:completion:)
-        cell.configureCell(movie: movies[indexPath.item])
+        cell.configureCell(movie: viewModel.movies[indexPath.item])
         return cell
     }
 }
@@ -323,7 +256,7 @@ extension MoviesListViewController: UICollectionViewDataSource {
 extension MoviesListViewController: UICollectionViewDelegate {
     func collectionView(_: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let movieDetailViewController = MovieDetailViewController()
-        movieDetailViewController.setMovieID(id: movies[indexPath.item].id)
+        movieDetailViewController.setMovieID(id: viewModel.movies[indexPath.item].id)
         navigationController?.pushViewController(movieDetailViewController, animated: true)
     }
 }
@@ -371,8 +304,9 @@ extension MoviesListViewController: UICollectionViewDelegateFlowLayout {
         willDisplay _: UICollectionViewCell,
         forItemAt indexPath: IndexPath
     ) {
-        if indexPath.item == movies.count - 1 {
-            searchMovies(searchTextField, isPaginate: true)
+        if indexPath.item == viewModel.movies.count - 1 {
+            viewModel.searchMovies(searchTextField, isPaginate: true)
+            updateView()
         }
     }
 }
@@ -381,10 +315,12 @@ extension MoviesListViewController: UICollectionViewDelegateFlowLayout {
 
 extension MoviesListViewController: UITextFieldDelegate {
     func textFieldDidChangeSelection(_ textField: UITextField) {
-        searchMovies(textField, isPaginate: false)
+        viewModel.searchMovies(textField, isPaginate: false)
+        updateView()
     }
 
     func textFieldShouldReturn(_: UITextField) -> Bool {
         searchTextField.resignFirstResponder()
+        return true
     }
 }
