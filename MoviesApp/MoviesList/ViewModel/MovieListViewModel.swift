@@ -4,10 +4,7 @@
 import UIKit
 
 protocol MovieListViewModelProtocol {
-    var movies: [Movie] { get set }
     var updateViewData: ViewDataHandler<[Movie]>? { get set }
-    var startLoadingAnimations: VoidHandler? { get set }
-    var reloadCollection: VoidHandler? { get set }
     func getMoviesPage(_ urlString: String)
     func searchMovies(_ textField: UITextField, isPaginate: Bool)
     func setCurrentCategory(_ category: MoviesCategories)
@@ -17,12 +14,11 @@ protocol MovieListViewModelProtocol {
 final class MovieListViewModel: MovieListViewModelProtocol {
     // MARK: - Public Properties
 
-    var startLoadingAnimations: VoidHandler?
     var updateViewData: ViewDataHandler<[Movie]>?
     var reloadCollection: VoidHandler?
     var movies: [Movie] = [] {
         didSet {
-            reloadCollection?()
+            updateViewData?(.data(movies))
         }
     }
 
@@ -45,7 +41,6 @@ final class MovieListViewModel: MovieListViewModelProtocol {
     // MARK: - Public Methods
 
     func getMoviesPage(_ urlString: String) {
-        startLoadingAnimations?()
         networkService.getMoviesPage(urlString: urlString) { [weak self] result in
             guard let self = self else { return }
             switch result {
@@ -54,7 +49,7 @@ final class MovieListViewModel: MovieListViewModelProtocol {
                     self.updateViewData?(.noData)
                     return
                 }
-                self.updateViewData?(.data(movies))
+                self.movies.append(contentsOf: movies)
                 self.setNextPageNumber(page)
             case let .failure(error):
                 self.updateViewData?(.error(error))
@@ -64,7 +59,11 @@ final class MovieListViewModel: MovieListViewModelProtocol {
 
     func searchMovies(_ textField: UITextField, isPaginate: Bool) {
         if !isPaginate { nextPageNumber = 1 }
-        if textField.hasText, let text = textField.text?.replacingOccurrences(of: " ", with: "%20") {
+        if nextPageNumber == -1 { return }
+        if textField.hasText, let text = textField.text?.replacingOccurrences(
+            of: " ",
+            with: "%20"
+        ) {
             getMoviesPage(Constants.getSearchMoviesURLString(page: nextPageNumber, searchedText: text))
         } else {
             if !isPaginate {

@@ -5,6 +5,12 @@ import UIKit
 
 /// MoviesListViewController
 final class MoviesListViewController: UIViewController {
+    private enum LocalConstants {
+        static let identifierMovieCollectionViewCell = "MovieCollectionViewCell"
+        static let identifierFooterView = "FooterView"
+        static let errorTitle = "Ошибка!"
+    }
+
     // MARK: - Visual Components
 
     private lazy var spinner: UIActivityIndicatorView = {
@@ -82,17 +88,9 @@ final class MoviesListViewController: UIViewController {
 
     // MARK: - Private Properties
 
-    private let networkManager = NetworkService()
     private var viewModel: MovieListViewModelProtocol = MovieListViewModel()
     private var viewData: ViewData<[Movie]>? {
-        didSet {
-            fetchUpdates()
-        }
-    }
-
-    private enum LocalConstants {
-        static let identifierMovieCollectionViewCell = "MovieCollectionViewCell"
-        static let identifierFooterView = "FooterView"
+        didSet { fetchUpdates() }
     }
 
     // MARK: - UIViewController(MoviesListViewController)
@@ -101,12 +99,6 @@ final class MoviesListViewController: UIViewController {
         super.viewDidLoad()
 
         setupView()
-        viewModel.startLoadingAnimations = { [weak self] in
-            self?.spinner.startAnimating()
-        }
-        viewModel.reloadCollection = { [weak self] in
-            self?.moviesCollectionView.reloadData()
-        }
     }
 
     // MARK: - Actions
@@ -150,23 +142,26 @@ final class MoviesListViewController: UIViewController {
             }
         categoriesButtons.first?.backgroundColor = .darkGray
 
-        viewData = .loading
         updateView()
+        viewModel.getMoviesPage(viewModel.getCurrentCategory().getUrlString(page: 1))
     }
 
     private func fetchUpdates() {
         let urlString = viewModel.getCurrentCategory().getUrlString(page: 1)
         switch viewData {
         case .loading:
-            viewModel.getMoviesPage(urlString)
-            updateView()
-        case let .data(movies):
-            viewModel.movies.append(contentsOf: movies)
+            spinner.startAnimating()
+        case .data:
+            moviesCollectionView.reloadData()
         case let .error(error):
-            showLoadingErrorAlert(title: "Ошибка!", message: error.localizedDescription) {
-                self.viewModel.getMoviesPage(urlString)
+            showLoadingErrorAlert(
+                title: LocalConstants.errorTitle,
+                message: error.localizedDescription
+            ) { [weak self] in
+                self?.viewModel.getMoviesPage(urlString)
             }
-        case .noData, .none: break
+        case .noData, .none:
+            break
         }
     }
 
@@ -237,18 +232,26 @@ final class MoviesListViewController: UIViewController {
 
 extension MoviesListViewController: UICollectionViewDataSource {
     func collectionView(_: UICollectionView, numberOfItemsInSection _: Int) -> Int {
-        viewModel.movies.count
+        guard case let .data(movies) = viewData else {
+            return 0
+        }
+        return movies.count
     }
 
     func collectionView(
         _ collectionView: UICollectionView,
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
+        guard case let .data(movies) = viewData else {
+            return UICollectionViewCell()
+        }
+
         guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: LocalConstants.identifierMovieCollectionViewCell,
             for: indexPath
         ) as? MovieCollectionViewCell else { return UICollectionViewCell() }
-        cell.configureCell(movie: viewModel.movies[indexPath.item])
+
+        cell.configureCell(movie: movies[indexPath.row])
         return cell
     }
 }
@@ -257,8 +260,10 @@ extension MoviesListViewController: UICollectionViewDataSource {
 
 extension MoviesListViewController: UICollectionViewDelegate {
     func collectionView(_: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard case let .data(movies) = viewData else { return }
+
         let movieDetailViewController = MovieDetailViewController()
-        movieDetailViewController.setMovieID(id: viewModel.movies[indexPath.item].id)
+        movieDetailViewController.setMovieID(id: movies[indexPath.item].id)
         navigationController?.pushViewController(movieDetailViewController, animated: true)
     }
 }
@@ -306,9 +311,10 @@ extension MoviesListViewController: UICollectionViewDelegateFlowLayout {
         willDisplay _: UICollectionViewCell,
         forItemAt indexPath: IndexPath
     ) {
-        if indexPath.item == viewModel.movies.count - 1 {
+        guard case let .data(movies) = viewData else { return }
+
+        if indexPath.item == movies.count - 1 {
             viewModel.searchMovies(searchTextField, isPaginate: true)
-            updateView()
         }
     }
 }
@@ -318,7 +324,6 @@ extension MoviesListViewController: UICollectionViewDelegateFlowLayout {
 extension MoviesListViewController: UITextFieldDelegate {
     func textFieldDidChangeSelection(_ textField: UITextField) {
         viewModel.searchMovies(textField, isPaginate: false)
-        updateView()
     }
 
     func textFieldShouldReturn(_: UITextField) -> Bool {

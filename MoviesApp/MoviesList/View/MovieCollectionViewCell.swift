@@ -26,9 +26,9 @@ final class MovieCollectionViewCell: UICollectionViewCell {
 
     // MARK: - Private Properties
 
-    private var viewData: ViewData<UIImage>? {
+    private var viewData: ViewData<UIImage> = .loading {
         didSet {
-            fetchUpdates()
+            setNeedsLayout()
         }
     }
 
@@ -39,33 +39,32 @@ final class MovieCollectionViewCell: UICollectionViewCell {
         moviePosterImageView.image = nil
     }
 
-    // MARK: - Private Properties
-
-    private lazy var views: [UIView] = [moviePosterImageView, movieTitleLabel]
-    private let viewModel = MovieCellViewModel()
-
-    // MARK: - Public Methods
-
-    func configureCell(movie: Movie) {
-        viewData = .loading
-        updateCell()
-        layer.cornerRadius = 10
-        views.forEach { addSubview($0) }
-        setupMoviePosterImageViewConstraints()
-        viewModel.showPosterImage(path: movie.posterPath)
-        updateCell()
-        setupMovieTitleLabel(title: movie.title)
-    }
-
-    func fetchUpdates() {
+    override func layoutSubviews() {
         switch viewData {
         case .loading:
             addShimmerAnimation()
         case let .data(image):
             setImage(image)
-        case .error, .noData, .none:
+        case .error, .noData:
             setImage(UIImage(named: "moviePlaceholder"))
         }
+    }
+
+    // MARK: - Private Properties
+
+    private lazy var views: [UIView] = [moviePosterImageView, movieTitleLabel]
+    private var viewModel = MovieCellViewModel()
+
+    // MARK: - Public Methods
+
+    func configureCell(movie: Movie) {
+        updateCell()
+
+        layer.cornerRadius = 10
+        views.forEach { addSubview($0) }
+        setupMoviePosterImageViewConstraints()
+        viewModel.showPosterImage(path: movie.posterPath)
+        setupMovieTitleLabel(title: movie.title)
     }
 
     // MARK: - Private Methods
@@ -80,7 +79,7 @@ final class MovieCollectionViewCell: UICollectionViewCell {
     private func setImage(_ image: UIImage?) {
         layer.sublayers?.filter { $0 is CAGradientLayer }.forEach { $0.removeFromSuperlayer() }
         moviePosterImageView.image = image
-        backgroundColor = UIColor(named: "CustomDarkGray")
+        backgroundColor = UIColor(named: "CustomBlack")
     }
 
     private func setupMovieTitleLabel(title: String?) {
