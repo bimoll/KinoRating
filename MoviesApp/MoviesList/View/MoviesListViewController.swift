@@ -167,9 +167,7 @@ final class MoviesListViewController: UIViewController {
 
     private func updateView() {
         viewModel.updateViewData = { [weak self] viewData in
-            guard let self = self else { return }
-            self.viewData = viewData
-            self.spinner.stopAnimating()
+            self?.viewData = viewData
         }
     }
 
@@ -261,9 +259,7 @@ extension MoviesListViewController: UICollectionViewDataSource {
 extension MoviesListViewController: UICollectionViewDelegate {
     func collectionView(_: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard case let .data(movies) = viewData else { return }
-
-        let movieDetailViewController = MovieDetailViewController()
-        movieDetailViewController.setMovieID(id: movies[indexPath.item].id)
+        let movieDetailViewController = AssemblyModules.createDetailMoviesModule(movies[indexPath.item].id)
         navigationController?.pushViewController(movieDetailViewController, animated: true)
     }
 }

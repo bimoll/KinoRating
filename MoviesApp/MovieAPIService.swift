@@ -1,9 +1,17 @@
-// NetworkService.swift
+// MovieAPIService.swift
 // Copyright © RoadMap. All rights reserved.
 
 import Foundation
 
-final class NetworkService {
+protocol MovieAPIServiceProtocol {
+    func getDecodable<T: Decodable>(
+        urlString: String,
+        to decode: T.Type,
+        completion: @escaping ResultHandler<T>
+    )
+}
+
+final class MovieAPIService: MovieAPIServiceProtocol {
     // MARK: - Private  Properties
 
     private let session = URLSession.shared
@@ -11,21 +19,22 @@ final class NetworkService {
 
     // MARK: - Public Methods
 
-    func getMoviesPage(
+    func getDecodable<T>(
         urlString: String,
-        comletion: @escaping (Result<MoviesListPage?, Error>) -> ()
-    ) {
+        to decode: T.Type,
+        completion: @escaping ResultHandler<T>
+    ) where T: Decodable {
         guard let url = URL(string: urlString) else {
-            comletion(.success(nil))
+            completion(.success(nil))
             return
         }
 
         session.dataTask(with: url) { data, _, error in
-            var result: Result<MoviesListPage?, Error>
+            var result: Result<T?, Error>
 
             defer {
                 DispatchQueue.main.async {
-                    comletion(result)
+                    completion(result)
                 }
             }
 
@@ -36,45 +45,13 @@ final class NetworkService {
 
             guard
                 let data = data,
-                let page = try? self.jsonDecoder.decode(MoviesListPage.self, from: data)
+                let page = try? self.jsonDecoder.decode(T.self, from: data)
             else {
                 result = .success(nil)
                 return
             }
 
             result = .success(page)
-        }.resume()
-    }
-
-    func getMoviesInfo(urlString: String, comletion: @escaping (Result<MovieInfo?, Error>) -> ()) {
-        guard let url = URL(string: urlString) else {
-            comletion(.success(nil))
-            return
-        }
-
-        session.dataTask(with: url) { data, _, error in
-            var result: Result<MovieInfo?, Error>
-
-            defer {
-                DispatchQueue.main.async {
-                    comletion(result)
-                }
-            }
-
-            if let error = error {
-                result = .failure(error)
-                return
-            }
-
-            guard
-                let data = data,
-                let json = try? self.jsonDecoder.decode(MovieInfo.self, from: data)
-            else {
-                result = .success(nil)
-                return
-            }
-
-            result = .success(json)
         }.resume()
     }
 

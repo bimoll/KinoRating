@@ -24,7 +24,7 @@ final class MovieListViewModel: MovieListViewModelProtocol {
 
     // MARK: - Private Properties
 
-    private var networkService = NetworkService()
+    private var networkService = MovieAPIService()
     private var nextPageNumber = 1 {
         didSet {
             if nextPageNumber == 1 { movies.removeAll() }
@@ -41,7 +41,7 @@ final class MovieListViewModel: MovieListViewModelProtocol {
     // MARK: - Public Methods
 
     func getMoviesPage(_ urlString: String) {
-        networkService.getMoviesPage(urlString: urlString) { [weak self] result in
+        networkService.getDecodable(urlString: urlString, to: MoviesListPage.self) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case let .success(page):
