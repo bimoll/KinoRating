@@ -26,14 +26,15 @@ final class MovieListViewModel: MovieListViewModelProtocol {
         }
     }
 
-    init() {
-        updateViewData?(.loading)
-    }
-
     // MARK: - Private Properties
 
     private var networkService = NetworkService()
-    private var nextPageNumber = 1
+    private var nextPageNumber = 1 {
+        didSet {
+            if nextPageNumber == 1 { movies.removeAll() }
+        }
+    }
+
     private lazy var moviesCategories: MoviesCategories = .popular {
         didSet {
             nextPageNumber = 1
@@ -62,18 +63,16 @@ final class MovieListViewModel: MovieListViewModelProtocol {
     }
 
     func searchMovies(_ textField: UITextField, isPaginate: Bool) {
-        let page = isPaginate ? nextPageNumber : 1
-
+        if !isPaginate { nextPageNumber = 1 }
         if textField.hasText, let text = textField.text?.replacingOccurrences(of: " ", with: "%20") {
-            if !isPaginate { movies = [] }
-            getMoviesPage(Constants.getSearchMoviesURLString(page: page, searchedText: text))
+            getMoviesPage(Constants.getSearchMoviesURLString(page: nextPageNumber, searchedText: text))
         } else {
             if !isPaginate {
                 setCategories()
                 return
             }
 
-            let urlString = moviesCategories.getUrlString(page: page)
+            let urlString = moviesCategories.getUrlString(page: nextPageNumber)
             getMoviesPage(urlString)
         }
     }

@@ -9,14 +9,16 @@ protocol MovieCellViewModelProtocol {
 }
 
 final class MovieCellViewModel: MovieCellViewModelProtocol {
+    // MARK: - Public Properties
+
     var updateViewData: ViewDataHandler<UIImage>?
+
+    // MARK: - Private Properties
 
     private let cacheImageService = CacheImageService()
     private var networkService = NetworkService()
 
-    init() {
-        updateViewData?(.loading)
-    }
+    // MARK: - Public Methods
 
     func showPosterImage(path: String?) {
         let posterURLString = Constants.getPosterURLString(path: path ?? "")
@@ -35,7 +37,10 @@ final class MovieCellViewModel: MovieCellViewModelProtocol {
             guard let self = self else { return }
             switch result {
             case let .success(data):
-                guard let data = data, let image = UIImage(data: data) else { return }
+                guard let data = data, let image = UIImage(data: data) else {
+                    self.updateViewData?(.noData)
+                    return
+                }
                 self.cacheImageService.saveImageToCache(url: posterURLString, image: image)
                 self.updateViewData?(.data(image))
             case let .failure(error):

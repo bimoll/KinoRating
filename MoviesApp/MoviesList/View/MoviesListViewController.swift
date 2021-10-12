@@ -84,7 +84,7 @@ final class MoviesListViewController: UIViewController {
 
     private let networkManager = NetworkService()
     private var viewModel: MovieListViewModelProtocol = MovieListViewModel()
-    private var viewData: ViewData<[Movie]> = .loading {
+    private var viewData: ViewData<[Movie]>? {
         didSet {
             fetchUpdates()
         }
@@ -150,6 +150,7 @@ final class MoviesListViewController: UIViewController {
             }
         categoriesButtons.first?.backgroundColor = .darkGray
 
+        viewData = .loading
         updateView()
     }
 
@@ -158,13 +159,14 @@ final class MoviesListViewController: UIViewController {
         switch viewData {
         case .loading:
             viewModel.getMoviesPage(urlString)
+            updateView()
         case let .data(movies):
             viewModel.movies.append(contentsOf: movies)
         case let .error(error):
             showLoadingErrorAlert(title: "Ошибка!", message: error.localizedDescription) {
                 self.viewModel.getMoviesPage(urlString)
             }
-        case .noData: break
+        case .noData, .none: break
         }
     }
 

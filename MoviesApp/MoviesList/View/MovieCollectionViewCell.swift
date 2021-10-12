@@ -26,7 +26,7 @@ final class MovieCollectionViewCell: UICollectionViewCell {
 
     // MARK: - Private Properties
 
-    private var viewData: ViewData<UIImage> = .loading {
+    private var viewData: ViewData<UIImage>? {
         didSet {
             fetchUpdates()
         }
@@ -47,9 +47,13 @@ final class MovieCollectionViewCell: UICollectionViewCell {
     // MARK: - Public Methods
 
     func configureCell(movie: Movie) {
+        viewData = .loading
+        updateCell()
         layer.cornerRadius = 10
         views.forEach { addSubview($0) }
-        setupMoviePosterImageView(posterPath: movie.posterPath)
+        setupMoviePosterImageViewConstraints()
+        viewModel.showPosterImage(path: movie.posterPath)
+        updateCell()
         setupMovieTitleLabel(title: movie.title)
     }
 
@@ -58,11 +62,9 @@ final class MovieCollectionViewCell: UICollectionViewCell {
         case .loading:
             addShimmerAnimation()
         case let .data(image):
-            moviePosterImageView.image = image
-            backgroundColor = UIColor(named: "CustomDarkGray")
-        case .error, .noData:
-            moviePosterImageView.image = UIImage(named: "moviePlaceholder")
-            backgroundColor = UIColor(named: "CustomDarkGray")
+            setImage(image)
+        case .error, .noData, .none:
+            setImage(UIImage(named: "moviePlaceholder"))
         }
     }
 
@@ -75,10 +77,10 @@ final class MovieCollectionViewCell: UICollectionViewCell {
         }
     }
 
-    private func setupMoviePosterImageView(posterPath: String?) {
-        setupMoviePosterImageViewConstraints()
-        viewModel.showPosterImage(path: posterPath)
-        updateCell()
+    private func setImage(_ image: UIImage?) {
+        layer.sublayers?.filter { $0 is CAGradientLayer }.forEach { $0.removeFromSuperlayer() }
+        moviePosterImageView.image = image
+        backgroundColor = UIColor(named: "CustomDarkGray")
     }
 
     private func setupMovieTitleLabel(title: String?) {
