@@ -9,6 +9,7 @@ final class MoviesListViewController: UIViewController {
         static let identifierMovieCollectionViewCell = "MovieCollectionViewCell"
         static let identifierFooterView = "FooterView"
         static let errorTitle = "Ошибка!"
+        static let searchTextFieldPlaceHolder = "Поиск по фильмам"
     }
 
     // MARK: - Visual Components
@@ -25,7 +26,7 @@ final class MoviesListViewController: UIViewController {
         searchTextField.textColor = .white
         searchTextField.autocorrectionType = .no
         searchTextField.attributedPlaceholder = NSAttributedString(
-            string: "Поиск по фильмам",
+            string: LocalConstants.searchTextFieldPlaceHolder,
             attributes: [
                 NSAttributedString.Key
                     .foregroundColor: UIColor.gray,
@@ -61,8 +62,9 @@ final class MoviesListViewController: UIViewController {
 
     private lazy var categoriesButtons: [UIButton] = {
         var buttons: [UIButton] = []
-        MoviesCategories.allCases
-            .forEach { buttons.append(UIButton().createSegmentedControlButton(setTitle: $0.rawValue)) }
+        MoviesCategories.allCases.forEach {
+            buttons.append(UIButton().createSegmentedControlButton(setTitle: $0.rawValue))
+        }
         return buttons
     }()
 
@@ -99,18 +101,16 @@ final class MoviesListViewController: UIViewController {
         super.viewDidLoad()
 
         setupView()
+        setupModel()
     }
 
     // MARK: - Actions
 
     @objc private func handleSegmentedControlButtons(sender: UIButton) {
-        guard
-            let title = sender.titleLabel?.text,
-            let categories = MoviesCategories(rawValue: title)
-        else { return }
+        guard let title = sender.titleLabel?.text else { return }
         navigationItem.title = "\(title) Movies"
-        viewModel.setCurrentCategory(categories)
         searchTextField.text = ""
+        viewModel.getMovies(title: title)
 
         categoriesButtons.forEach { button in
             if button == sender {
@@ -136,40 +136,47 @@ final class MoviesListViewController: UIViewController {
         setupCategoriesScrollViewConstraints()
         setupCategoriesStackViewConstraints()
         setupSearchTextFieldConstraints()
-        categoriesButtons
-            .forEach {
-                $0.addTarget(self, action: #selector(handleSegmentedControlButtons(sender:)), for: .touchUpInside)
-            }
+        categoriesButtons.forEach {
+            $0.addTarget(self, action: #selector(handleSegmentedControlButtons(sender:)), for: .touchUpInside)
+        }
         categoriesButtons.first?.backgroundColor = .darkGray
+    }
 
-        updateView()
-        viewModel.getMoviesPage(viewModel.getCurrentCategory().getUrlString(page: 1))
+    private func setupModel() {
+        viewModel.getSearchText = { [weak self] in
+            guard let self = self,
+                  self.searchTextField.hasText,
+                  let text = self.searchTextField.text?.replacingOccurrences(of: " ", with: "%20")
+            else {
+                return nil
+            }
+            return text
+        }
+
+        viewModel.updateViewData = { [weak self] viewData in
+            self?.viewData = viewData
+        }
+
+        viewModel.start()
     }
 
     private func fetchUpdates() {
-        let urlString = viewModel.getCurrentCategory().getUrlString(page: 1)
         switch viewData {
         case .loading:
             spinner.startAnimating()
         case .data:
             moviesCollectionView.reloadData()
+            spinner.stopAnimating()
         case let .error(error):
+            spinner.stopAnimating()
             showLoadingErrorAlert(
                 title: LocalConstants.errorTitle,
                 message: error.localizedDescription
             ) { [weak self] in
-                self?.viewModel.getMoviesPage(urlString)
+                self?.viewModel.start()
             }
         case .noData, .none:
-            break
-        }
-    }
-
-    private func updateView() {
-        viewModel.updateViewData = { [weak self] viewData in
-            guard let self = self else { return }
-            self.viewData = viewData
-            self.spinner.stopAnimating()
+            spinner.stopAnimating()
         }
     }
 
@@ -261,9 +268,7 @@ extension MoviesListViewController: UICollectionViewDataSource {
 extension MoviesListViewController: UICollectionViewDelegate {
     func collectionView(_: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard case let .data(movies) = viewData else { return }
-
-        let movieDetailViewController = MovieDetailViewController()
-        movieDetailViewController.setMovieID(id: movies[indexPath.item].id)
+        let movieDetailViewController = Assembly.createDetailMoviesModule(movies[indexPath.item].id)
         navigationController?.pushViewController(movieDetailViewController, animated: true)
     }
 }
@@ -314,7 +319,7 @@ extension MoviesListViewController: UICollectionViewDelegateFlowLayout {
         guard case let .data(movies) = viewData else { return }
 
         if indexPath.item == movies.count - 1 {
-            viewModel.searchMovies(searchTextField, isPaginate: true)
+            viewModel.paginate()
         }
     }
 }
@@ -323,7 +328,7 @@ extension MoviesListViewController: UICollectionViewDelegateFlowLayout {
 
 extension MoviesListViewController: UITextFieldDelegate {
     func textFieldDidChangeSelection(_ textField: UITextField) {
-        viewModel.searchMovies(textField, isPaginate: false)
+        viewModel.searchMovies()
     }
 
     func textFieldShouldReturn(_: UITextField) -> Bool {

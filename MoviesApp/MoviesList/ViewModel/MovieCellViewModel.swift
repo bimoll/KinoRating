@@ -16,13 +16,12 @@ final class MovieCellViewModel: MovieCellViewModelProtocol {
     // MARK: - Private Properties
 
     private let cacheImageService = CacheImageService()
-    private var networkService = NetworkService()
+    private var imageService = ImageAPIService()
 
     // MARK: - Public Methods
 
     func showPosterImage(path: String?) {
         let posterURLString = Constants.getPosterURLString(path: path ?? "")
-
         if let image = cacheImageService.getImageFromCache(url: posterURLString) {
             updateViewData?(.data(image))
             return
@@ -33,7 +32,7 @@ final class MovieCellViewModel: MovieCellViewModelProtocol {
             return
         }
 
-        networkService.downloadImage(url: posterURL) { [weak self] result in
+        imageService.downloadImage(url: posterURL) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case let .success(data):

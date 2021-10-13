@@ -4,6 +4,8 @@
 import UIKit
 
 final class MoviePosterTableViewCell: UITableViewCell {
+    static let identifier = "MoviePosterTableViewCell"
+
     // MARK: - Visual Components
 
     private let posterImageView: UIImageView = {
@@ -15,32 +17,48 @@ final class MoviePosterTableViewCell: UITableViewCell {
 
     // MARK: - Private Properties
 
-    private let networkManager = NetworkService()
+    private var viewModel: MovieCellViewModelProtocol = MovieCellViewModel()
+
+    private var viewData: ViewData<UIImage> = .loading {
+        didSet { fetchUpdates() }
+    }
+
+    // MARK: - UITableViewCell(MoviePosterTableViewCell)
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
+        selectionStyle = .none
         setupPosterImageViewConstraints()
+    }
+
+    // MARK: - Public Methods
+
+    func configureCell(imagePath: String?) {
+        viewModel.updateViewData = { [weak self] viewData in
+            self?.viewData = viewData
+        }
+        viewModel.showPosterImage(path: imagePath)
     }
 
     // MARK: - Private Methods
 
-    func configureCell(imagePath: String?) {
-        guard let path = imagePath else { return }
-        let posterURLString = "https://image.tmdb.org/t/p/w500\(path)"
-        guard let posterURL = URL(string: posterURLString) else { return }
-        networkManager.downloadImage(url: posterURL) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case let .success(data):
-                guard let data = data else { return }
-                DispatchQueue.main.async {
-                    self.posterImageView.image = UIImage(data: data)
-                }
-            case let .failure(error):
-                print(error)
-            }
+    private func fetchUpdates() {
+        switch viewData {
+        case .loading:
+            addShimmerAnimation()
+        case let .data(image):
+            setImage(image)
+        case .error, .noData:
+            if posterImageView.image != nil { break }
+            setImage(UIImage(named: GlobalConstants.moviePlaceholderImageName))
         }
+    }
+
+    private func setImage(_ image: UIImage?) {
+        layer.sublayers?.filter { $0 is CAGradientLayer }.forEach { $0.removeFromSuperlayer() }
+        posterImageView.image = image
+        backgroundColor = UIColor(named: GlobalConstants.customBlackColorName)
     }
 
     private func setupPosterImageViewConstraints() {

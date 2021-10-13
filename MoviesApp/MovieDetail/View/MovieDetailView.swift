@@ -4,11 +4,25 @@
 import UIKit
 
 final class MovieDetailView: UIView {
+    private enum LocalConstants {
+        static let countCells = 4
+    }
+
     // MARK: - Visual Components
+
+    private lazy var shimmerView: UIView = {
+        let view = UIView()
+        let frameSize = CGPoint(x: UIScreen.main.bounds.midX, y: UIScreen.main.bounds.midY)
+        addSubview(view)
+        view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: frameSize.y)
+        view.center = frameSize
+        return view
+    }()
 
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.dataSource = self
+        tableView.isHidden = true
         tableView.backgroundColor = .black
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 150
@@ -16,25 +30,26 @@ final class MovieDetailView: UIView {
         tableView.separatorColor = .white
         tableView.showsVerticalScrollIndicator = false
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
-        tableView.register(MoviePosterTableViewCell.self, forCellReuseIdentifier: identifierMoviePosterTableViewCell)
-        tableView.register(MovieRatingTableViewCell.self, forCellReuseIdentifier: identifierMovieRatingTableViewCell)
+        tableView.register(
+            MoviePosterTableViewCell.self,
+            forCellReuseIdentifier: MoviePosterTableViewCell.identifier
+        )
+        tableView.register(
+            MovieRatingTableViewCell.self,
+            forCellReuseIdentifier: MovieRatingTableViewCell.identifier
+        )
         tableView.register(
             MovieReleaseInfoTableViewCell.self,
-            forCellReuseIdentifier: identifierMovieReleaseInfoTableViewCell
+            forCellReuseIdentifier: MovieReleaseInfoTableViewCell.identifier
         )
         tableView.register(
             MovieOverviewTableViewCell.self,
-            forCellReuseIdentifier: identifierMovieOverviewTableViewCell
+            forCellReuseIdentifier: MovieOverviewTableViewCell.identifier
         )
         return tableView
     }()
 
     // MARK: - Private Properties
-
-    private let identifierMoviePosterTableViewCell = "MoviePosterTableViewCell"
-    private let identifierMovieRatingTableViewCell = "MovieRatingTableViewCell"
-    private let identifierMovieReleaseInfoTableViewCell = "MovieReleaseInfoTableViewCell"
-    private let identifierMovieOverviewTableViewCell = "MovieOverviewTableViewCell"
 
     private var movieInfo: MovieInfo? {
         didSet {
@@ -57,8 +72,16 @@ final class MovieDetailView: UIView {
 
     // MARK: - Public Methods
 
-    func setMovieInfo(movieInfo: MovieInfo?) {
-        self.movieInfo = movieInfo
+    func startLoading() {
+        shimmerView.isHidden = false
+        tableView.isHidden = true
+        shimmerView.addShimmerAnimation()
+    }
+
+    func showMoviesInfo(_ info: MovieInfo) {
+        tableView.isHidden = false
+        shimmerView.isHidden = true
+        movieInfo = info
     }
 
     // MARK: - Private Methods
@@ -84,44 +107,40 @@ final class MovieDetailView: UIView {
 
 extension MovieDetailView: UITableViewDataSource {
     func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
-        4
+        LocalConstants.countCells
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        switch indexPath.row {
-        case 0:
+        switch MovieInfoCellType(rawValue: indexPath.row) {
+        case .poster:
             guard let cell = tableView
-                .dequeueReusableCell(withIdentifier: identifierMoviePosterTableViewCell) as? MoviePosterTableViewCell
+                .dequeueReusableCell(withIdentifier: MoviePosterTableViewCell.identifier) as? MoviePosterTableViewCell
             else { return UITableViewCell() }
             cell.configureCell(imagePath: movieInfo?.backdropPath)
-            cell.selectionStyle = .none
             return cell
-        case 1:
-            guard let cell = tableView
-                .dequeueReusableCell(withIdentifier: identifierMovieRatingTableViewCell) as? MovieRatingTableViewCell
-            else { return UITableViewCell() }
-            cell.configureCell(movieInfo: movieInfo)
-            cell.selectionStyle = .none
-            return cell
-        case 2:
+        case .overview:
             guard let cell = tableView
                 .dequeueReusableCell(
-                    withIdentifier: identifierMovieReleaseInfoTableViewCell
-                ) as? MovieReleaseInfoTableViewCell
-            else { return UITableViewCell() }
+                    withIdentifier: MovieOverviewTableViewCell
+                        .identifier
+                ) as? MovieOverviewTableViewCell else { return UITableViewCell() }
             cell.configureCell(movieInfo: movieInfo)
-            cell.selectionStyle = .none
             return cell
-        case 3:
+        case .release:
             guard let cell = tableView
                 .dequeueReusableCell(
-                    withIdentifier: identifierMovieOverviewTableViewCell
-                ) as? MovieOverviewTableViewCell
+                    withIdentifier: MovieReleaseInfoTableViewCell
+                        .identifier
+                ) as? MovieReleaseInfoTableViewCell else { return UITableViewCell() }
+            cell.configureCell(movieInfo: movieInfo)
+            return cell
+        case .rating:
+            guard let cell = tableView
+                .dequeueReusableCell(withIdentifier: MovieRatingTableViewCell.identifier) as? MovieRatingTableViewCell
             else { return UITableViewCell() }
             cell.configureCell(movieInfo: movieInfo)
-            cell.selectionStyle = .none
             return cell
-        default:
+        case .none:
             return UITableViewCell()
         }
     }

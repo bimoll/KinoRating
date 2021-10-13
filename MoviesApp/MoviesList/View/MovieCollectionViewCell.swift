@@ -46,7 +46,7 @@ final class MovieCollectionViewCell: UICollectionViewCell {
         case let .data(image):
             setImage(image)
         case .error, .noData:
-            setImage(UIImage(named: "moviePlaceholder"))
+            setImage(UIImage(named: GlobalConstants.moviePlaceholderImageName))
         }
     }
 
@@ -79,7 +79,7 @@ final class MovieCollectionViewCell: UICollectionViewCell {
     private func setImage(_ image: UIImage?) {
         layer.sublayers?.filter { $0 is CAGradientLayer }.forEach { $0.removeFromSuperlayer() }
         moviePosterImageView.image = image
-        backgroundColor = UIColor(named: "CustomBlack")
+        backgroundColor = UIColor(named: GlobalConstants.customBlackColorName)
     }
 
     private func setupMovieTitleLabel(title: String?) {

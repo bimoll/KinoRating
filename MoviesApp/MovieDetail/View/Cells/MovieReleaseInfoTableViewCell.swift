@@ -4,14 +4,16 @@
 import UIKit
 
 final class MovieReleaseInfoTableViewCell: UITableViewCell {
+    static let identifier = "MovieReleaseInfoTableViewCell"
+
     // MARK: - Visual Coponents
 
     private let durationTitleLabel = UILabel().createTitleLabel()
-    private let durationImageView = UIImageView().createSystemIconImageView(iconName: "hourglass.bottomhalf.fill")
+    private let durationImageView = UIImageView().createSystemIconImageView(iconName: GlobalConstants.durationImageName)
     private let durationLabel = UILabel().createSmallDescriptionLabel()
     private let ganresTitleLabel = UILabel().createTitleLabel()
     private let ganresLabel = UILabel().createSmallDescriptionLabel()
-    private let ganrerImageView = UIImageView().createSystemIconImageView(iconName: "aqi.low")
+    private let ganrerImageView = UIImageView().createSystemIconImageView(iconName: GlobalConstants.genresImageName)
 
     // MARK: - Private Properties
 
@@ -30,7 +32,7 @@ final class MovieReleaseInfoTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
 
         views.forEach { addSubview($0) }
-        backgroundColor = UIColor(named: "CustomDarkGray")
+        backgroundColor = UIColor(named: GlobalConstants.customDarkGrayColorName)
         durationTitleLabel.text = "Длительность"
         ganresTitleLabel.text = "Жанры"
 
@@ -39,6 +41,7 @@ final class MovieReleaseInfoTableViewCell: UITableViewCell {
         setupGanresTitleLabelConstraints()
         setupGanresImageViewConstraints()
         setupGanresLabelConstraints()
+        selectionStyle = .none
     }
 
     // MARK: - Public Methods
@@ -49,7 +52,7 @@ final class MovieReleaseInfoTableViewCell: UITableViewCell {
 
         guard let ganres = movieInfo?.genres else { return }
         var ganresString = ""
-        ganres.forEach { ganresString += "\n\($0.name ?? "")" }
+        ganres.forEach { ganresString += "\n\($0.name ?? "без жанра")" }
         ganresLabel.text = ganresString
 
         setupDurationImageViewConstraints()
@@ -73,9 +76,6 @@ final class MovieReleaseInfoTableViewCell: UITableViewCell {
             durationImageView.heightAnchor.constraint(equalToConstant: 30),
             durationImageView.widthAnchor.constraint(equalTo: durationTitleLabel.heightAnchor, multiplier: 1),
         ])
-
-//        guard let count = ganresLabel.text?.count, count < 15 else { return }
-//        durationImageView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -25).isActive = true
     }
 
     private func setupDurationLabelConstraints() {

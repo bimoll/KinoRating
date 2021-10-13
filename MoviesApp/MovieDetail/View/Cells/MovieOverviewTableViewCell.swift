@@ -4,6 +4,8 @@
 import UIKit
 
 final class MovieOverviewTableViewCell: UITableViewCell {
+    static let identifier = "MovieOverviewTableViewCell"
+
     // MARK: - Visual Components
 
     private let overviewTitleLabel = UILabel().createTitleLabel()
@@ -18,10 +20,11 @@ final class MovieOverviewTableViewCell: UITableViewCell {
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
-        backgroundColor = UIColor(named: "CustomDarkGray")
+        backgroundColor = UIColor(named: GlobalConstants.customDarkGrayColorName)
         views.forEach { addSubview($0) }
         setupOverviewTitleLabel()
         setupOverviewLabel()
+        selectionStyle = .none
     }
 
     // MARK: - Public Methods
