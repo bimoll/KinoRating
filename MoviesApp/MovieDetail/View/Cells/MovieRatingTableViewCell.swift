@@ -4,13 +4,17 @@
 import UIKit
 
 final class MovieRatingTableViewCell: UITableViewCell {
+    static let identifier = "MovieRatingTableViewCell"
+
     // MARK: - Visual Components
 
     private let titleLable = UILabel().createTitleLabel()
     private let popularityLabel = UILabel().createSmallDescriptionLabel()
     private let voteCountLabel = UILabel().createSmallDescriptionLabel()
-    private let popularityImageView = UIImageView().createSystemIconImageView(iconName: "star.fill")
-    private let voteCountImageView = UIImageView().createSystemIconImageView(iconName: "person.3.fill")
+    private let popularityImageView = UIImageView()
+        .createSystemIconImageView(iconName: GlobalConstants.popularityImageName)
+    private let voteCountImageView = UIImageView()
+        .createSystemIconImageView(iconName: GlobalConstants.voteCountImageName)
 
     // MARK: - Private Properties
 
@@ -22,13 +26,25 @@ final class MovieRatingTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
 
         views.forEach { addSubview($0) }
-        backgroundColor = UIColor(named: "CustomDarkGray")
+        backgroundColor = UIColor(named: GlobalConstants.customDarkGrayColorName)
         titleLable.font = UIFont.systemFont(ofSize: 26)
         setupTitleLabelConstraints()
         setupPopularityImageViewConstraints()
         setupPopularityLabelConstraints()
         setupRatingImageViewConstraints()
         setupRatingLabelConstraints()
+        selectionStyle = .none
+    }
+
+    // MARK: - Public Methods
+
+    func configureCell(movieInfo: MovieInfo?) {
+        guard let rating = movieInfo?.voteAverage else { return }
+        guard let titleText = movieInfo?.title else { return }
+        titleLable.text = titleText
+        popularityLabel.text = "Рейтинг: \(rating)"
+        guard let voteCount = movieInfo?.voteCount else { return }
+        voteCountLabel.text = "\(voteCount) оценки"
     }
 
     // MARK: - Private Methods
@@ -77,18 +93,5 @@ final class MovieRatingTableViewCell: UITableViewCell {
             voteCountLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
             voteCountLabel.leadingAnchor.constraint(equalTo: voteCountImageView.trailingAnchor, constant: 20),
         ])
-    }
-}
-
-// MARK: - MovieInfoCellProtocol
-
-extension MovieRatingTableViewCell: MovieInfoCellProtocol {
-    func configureCell(movieInfo: MovieInfo?) {
-        guard let rating = movieInfo?.voteAverage else { return }
-        guard let titleText = movieInfo?.title else { return }
-        titleLable.text = titleText
-        popularityLabel.text = "Рейтинг: \(rating)"
-        guard let voteCount = movieInfo?.voteCount else { return }
-        voteCountLabel.text = "\(voteCount) оценки"
     }
 }

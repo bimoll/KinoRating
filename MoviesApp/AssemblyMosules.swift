@@ -3,11 +3,11 @@
 
 import UIKit
 
-protocol AssemblyModulesProtocol {
+protocol AssemblyProtocol {
     static func createDetailMoviesModule(_ movieID: Int?) -> UIViewController
 }
 
-final class AssemblyModules: AssemblyModulesProtocol {
+final class Assembly: AssemblyProtocol {
     static func createDetailMoviesModule(_ movieID: Int?) -> UIViewController {
         let moviesAPIService = MovieAPIService()
         let viewModel = MovieDetailViewModel(movieID: movieID, moviesAPIService: moviesAPIService)

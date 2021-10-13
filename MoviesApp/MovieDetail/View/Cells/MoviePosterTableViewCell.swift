@@ -4,6 +4,8 @@
 import UIKit
 
 final class MoviePosterTableViewCell: UITableViewCell {
+    static let identifier = "MoviePosterTableViewCell"
+
     // MARK: - Visual Components
 
     private let posterImageView: UIImageView = {
@@ -26,6 +28,7 @@ final class MoviePosterTableViewCell: UITableViewCell {
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
+        selectionStyle = .none
         setupPosterImageViewConstraints()
     }
 
@@ -48,14 +51,14 @@ final class MoviePosterTableViewCell: UITableViewCell {
             setImage(image)
         case .error, .noData:
             if posterImageView.image != nil { break }
-            setImage(UIImage(named: "moviePlaceholder"))
+            setImage(UIImage(named: GlobalConstants.moviePlaceholderImageName))
         }
     }
 
     private func setImage(_ image: UIImage?) {
         layer.sublayers?.filter { $0 is CAGradientLayer }.forEach { $0.removeFromSuperlayer() }
         posterImageView.image = image
-        backgroundColor = UIColor(named: "CustomBlack")
+        backgroundColor = UIColor(named: GlobalConstants.customBlackColorName)
     }
 
     private func setupPosterImageViewConstraints() {

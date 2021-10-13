@@ -4,14 +4,16 @@
 import UIKit
 
 final class MovieReleaseInfoTableViewCell: UITableViewCell {
+    static let identifier = "MovieReleaseInfoTableViewCell"
+
     // MARK: - Visual Coponents
 
     private let durationTitleLabel = UILabel().createTitleLabel()
-    private let durationImageView = UIImageView().createSystemIconImageView(iconName: "hourglass.bottomhalf.fill")
+    private let durationImageView = UIImageView().createSystemIconImageView(iconName: GlobalConstants.durationImageName)
     private let durationLabel = UILabel().createSmallDescriptionLabel()
     private let ganresTitleLabel = UILabel().createTitleLabel()
     private let ganresLabel = UILabel().createSmallDescriptionLabel()
-    private let ganrerImageView = UIImageView().createSystemIconImageView(iconName: "aqi.low")
+    private let ganrerImageView = UIImageView().createSystemIconImageView(iconName: GlobalConstants.genresImageName)
 
     // MARK: - Private Properties
 
@@ -30,7 +32,7 @@ final class MovieReleaseInfoTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
 
         views.forEach { addSubview($0) }
-        backgroundColor = UIColor(named: "CustomDarkGray")
+        backgroundColor = UIColor(named: GlobalConstants.customDarkGrayColorName)
         durationTitleLabel.text = "Длительность"
         ganresTitleLabel.text = "Жанры"
 
@@ -39,6 +41,21 @@ final class MovieReleaseInfoTableViewCell: UITableViewCell {
         setupGanresTitleLabelConstraints()
         setupGanresImageViewConstraints()
         setupGanresLabelConstraints()
+        selectionStyle = .none
+    }
+
+    // MARK: - Public Methods
+
+    func configureCell(movieInfo: MovieInfo?) {
+        guard let duration = movieInfo?.runtime else { return }
+        durationLabel.text = "\(duration) минут(ы)"
+
+        guard let ganres = movieInfo?.genres else { return }
+        var ganresString = ""
+        ganres.forEach { ganresString += "\n\($0.name ?? "без жанра")" }
+        ganresLabel.text = ganresString
+
+        setupDurationImageViewConstraints()
     }
 
     // MARK: - Private Methods
@@ -95,21 +112,5 @@ final class MovieReleaseInfoTableViewCell: UITableViewCell {
             ganresLabel.leadingAnchor.constraint(equalTo: ganrerImageView.trailingAnchor, constant: 20),
             ganresLabel.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -15),
         ])
-    }
-}
-
-// MARK: - MovieInfoCellProtocol
-
-extension MovieReleaseInfoTableViewCell: MovieInfoCellProtocol {
-    func configureCell(movieInfo: MovieInfo?) {
-        guard let duration = movieInfo?.runtime else { return }
-        durationLabel.text = "\(duration) минут(ы)"
-
-        guard let ganres = movieInfo?.genres else { return }
-        var ganresString = ""
-        ganres.forEach { ganresString += "\n\($0.name ?? "без жанра")" }
-        ganresLabel.text = ganresString
-
-        setupDurationImageViewConstraints()
     }
 }

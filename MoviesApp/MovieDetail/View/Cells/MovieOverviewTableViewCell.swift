@@ -4,6 +4,8 @@
 import UIKit
 
 final class MovieOverviewTableViewCell: UITableViewCell {
+    static let identifier = "MovieOverviewTableViewCell"
+
     // MARK: - Visual Components
 
     private let overviewTitleLabel = UILabel().createTitleLabel()
@@ -18,10 +20,24 @@ final class MovieOverviewTableViewCell: UITableViewCell {
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
-        backgroundColor = UIColor(named: "CustomDarkGray")
+        backgroundColor = UIColor(named: GlobalConstants.customDarkGrayColorName)
         views.forEach { addSubview($0) }
         setupOverviewTitleLabel()
         setupOverviewLabel()
+        selectionStyle = .none
+    }
+
+    // MARK: - Public Methods
+
+    func configureCell(movieInfo: MovieInfo?) {
+        guard let overview = movieInfo?.overview else { return }
+        overviewLabel.text = overview
+        guard let tagline = movieInfo?.tagline else { return }
+        if tagline.isEmpty {
+            overviewTitleLabel.text = "Описание фильма"
+            return
+        }
+        overviewTitleLabel.text = tagline
     }
 
     // MARK: - Private Methods
@@ -42,20 +58,5 @@ final class MovieOverviewTableViewCell: UITableViewCell {
             overviewLabel.trailingAnchor.constraint(equalTo: overviewTitleLabel.trailingAnchor),
             overviewLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -15),
         ])
-    }
-}
-
-// MARK: - MovieInfoCellProtocol
-
-extension MovieOverviewTableViewCell: MovieInfoCellProtocol {
-    func configureCell(movieInfo: MovieInfo?) {
-        guard let overview = movieInfo?.overview else { return }
-        overviewLabel.text = overview
-        guard let tagline = movieInfo?.tagline else { return }
-        if tagline.isEmpty {
-            overviewTitleLabel.text = "Описание фильма"
-            return
-        }
-        overviewTitleLabel.text = tagline
     }
 }

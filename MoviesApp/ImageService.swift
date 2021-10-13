@@ -3,8 +3,12 @@
 
 import Foundation
 
-final class ImageAPIService {
-    func downloadImage(url: URL, completion: @escaping (Result<Data?, Error>) -> ()) {
+protocol ImageAPIServiceProtocol {
+    func downloadImage(url: URL, completion: @escaping ResultHandler<Data?>)
+}
+
+final class ImageAPIService: ImageAPIServiceProtocol {
+    func downloadImage(url: URL, completion: @escaping ResultHandler<Data?>) {
         URLSession.shared.dataTask(with: url) { data, _, error in
             var result: Result<Data?, Error>
 

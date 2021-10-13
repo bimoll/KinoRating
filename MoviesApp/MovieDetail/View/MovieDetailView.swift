@@ -5,10 +5,6 @@ import UIKit
 
 final class MovieDetailView: UIView {
     private enum LocalConstants {
-        static let identifierMoviePosterTableViewCell = "MoviePosterTableViewCell"
-        static let identifierMovieRatingTableViewCell = "MovieRatingTableViewCell"
-        static let identifierMovieReleaseInfoTableViewCell = "MovieReleaseInfoTableViewCell"
-        static let identifierMovieOverviewTableViewCell = "MovieOverviewTableViewCell"
         static let countCells = 4
     }
 
@@ -36,19 +32,19 @@ final class MovieDetailView: UIView {
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
         tableView.register(
             MoviePosterTableViewCell.self,
-            forCellReuseIdentifier: LocalConstants.identifierMoviePosterTableViewCell
+            forCellReuseIdentifier: MoviePosterTableViewCell.identifier
         )
         tableView.register(
             MovieRatingTableViewCell.self,
-            forCellReuseIdentifier: LocalConstants.identifierMovieRatingTableViewCell
+            forCellReuseIdentifier: MovieRatingTableViewCell.identifier
         )
         tableView.register(
             MovieReleaseInfoTableViewCell.self,
-            forCellReuseIdentifier: LocalConstants.identifierMovieReleaseInfoTableViewCell
+            forCellReuseIdentifier: MovieReleaseInfoTableViewCell.identifier
         )
         tableView.register(
             MovieOverviewTableViewCell.self,
-            forCellReuseIdentifier: LocalConstants.identifierMovieOverviewTableViewCell
+            forCellReuseIdentifier: MovieOverviewTableViewCell.identifier
         )
         return tableView
     }()
@@ -115,34 +111,37 @@ extension MovieDetailView: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var identifier: String
-
-        switch indexPath.row {
-        case 0:
+        switch MovieInfoCellType(rawValue: indexPath.row) {
+        case .poster:
             guard let cell = tableView
-                .dequeueReusableCell(
-                    withIdentifier: LocalConstants
-                        .identifierMoviePosterTableViewCell
-                ) as? MoviePosterTableViewCell
+                .dequeueReusableCell(withIdentifier: MoviePosterTableViewCell.identifier) as? MoviePosterTableViewCell
             else { return UITableViewCell() }
             cell.configureCell(imagePath: movieInfo?.backdropPath)
-            cell.selectionStyle = .none
             return cell
-        case 1:
-            identifier = LocalConstants.identifierMovieRatingTableViewCell
-        case 2:
-            identifier = LocalConstants.identifierMovieReleaseInfoTableViewCell
-        case 3:
-            identifier = LocalConstants.identifierMovieOverviewTableViewCell
-        default:
+        case .overview:
+            guard let cell = tableView
+                .dequeueReusableCell(
+                    withIdentifier: MovieOverviewTableViewCell
+                        .identifier
+                ) as? MovieOverviewTableViewCell else { return UITableViewCell() }
+            cell.configureCell(movieInfo: movieInfo)
+            return cell
+        case .release:
+            guard let cell = tableView
+                .dequeueReusableCell(
+                    withIdentifier: MovieReleaseInfoTableViewCell
+                        .identifier
+                ) as? MovieReleaseInfoTableViewCell else { return UITableViewCell() }
+            cell.configureCell(movieInfo: movieInfo)
+            return cell
+        case .rating:
+            guard let cell = tableView
+                .dequeueReusableCell(withIdentifier: MovieRatingTableViewCell.identifier) as? MovieRatingTableViewCell
+            else { return UITableViewCell() }
+            cell.configureCell(movieInfo: movieInfo)
+            return cell
+        case .none:
             return UITableViewCell()
         }
-
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: identifier) as? MovieInfoCellProtocol else {
-            return UITableViewCell()
-        }
-        cell.configureCell(movieInfo: movieInfo)
-        cell.selectionStyle = .none
-        return cell
     }
 }

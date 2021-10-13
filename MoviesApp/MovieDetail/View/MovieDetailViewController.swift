@@ -58,7 +58,10 @@ final class MovieDetailViewController: UIViewController {
     }
 
     private func failure() {
-        showLoadingErrorAlert(title: "Нет подключения к интернету", message: "Попробовать еще?") { [weak self] in
+        showLoadingErrorAlert(
+            title: GlobalConstants.notNetworkMessage,
+            message: GlobalConstants.isRetryMessage
+        ) { [weak self] in
             self?.viewModel.getMovieInfo()
         }
     }

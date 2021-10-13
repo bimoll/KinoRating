@@ -7,7 +7,7 @@ protocol MovieAPIServiceProtocol {
     func getDecodable<T: Decodable>(
         urlString: String,
         to decode: T.Type,
-        completion: @escaping ResultHandler<T>
+        completion: @escaping ResultHandler<T?>
     )
 }
 
@@ -17,7 +17,7 @@ final class MovieAPIService: MovieAPIServiceProtocol {
     func getDecodable<T>(
         urlString: String,
         to decode: T.Type,
-        completion: @escaping ResultHandler<T>
+        completion: @escaping ResultHandler<T?>
     ) where T: Decodable {
         guard let url = URL(string: urlString) else {
             completion(.success(nil))
