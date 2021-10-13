@@ -29,6 +29,6 @@ final class CoordinatorTests: XCTestCase {
 
     func testValidPresentation() {
         coordinator.start()
-        XCTAssertTrue(mockNavigationController.presentedVC is UIViewController)
+        XCTAssertTrue(mockNavigationController.presentedVC is MoviesListViewController)
     }
 }
