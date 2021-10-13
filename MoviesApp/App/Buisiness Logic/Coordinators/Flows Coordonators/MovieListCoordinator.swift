@@ -10,7 +10,8 @@ final class MovieListCoordinator: BaseCoordinatorProtocol {
     private var assembly: AssemblyProtocol
     private var navigationController: UINavigationController?
 
-    required init(assembly: AssemblyProtocol) {
+    required init(assembly: AssemblyProtocol, navigationController: UINavigationController?) {
+        self.navigationController = navigationController
         self.assembly = assembly
     }
 
@@ -24,7 +25,10 @@ final class MovieListCoordinator: BaseCoordinatorProtocol {
             self?.showDetailMovie(id)
         }
 
-        navigationController = BaseNavigationController(rootViewController: movieListVC)
+        if navigationController == nil {
+            navigationController = BaseNavigationController()
+        }
+        navigationController?.pushViewController(movieListVC, animated: true)
         setAsRoot(navigationController)
     }
 
