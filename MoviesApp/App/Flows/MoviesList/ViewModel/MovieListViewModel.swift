@@ -9,7 +9,7 @@ protocol MovieListViewModelProtocol {
     func start()
     func paginate()
     func searchMovies()
-    func getMovies(title: String)
+    func showMovies(title: String)
 }
 
 final class MovieListViewModel: MovieListViewModelProtocol {
@@ -21,7 +21,7 @@ final class MovieListViewModel: MovieListViewModelProtocol {
     // MARK: - Private Properties
 
     private let startPage = 1
-    private var movieAPIService = MovieAPIService()
+    private var movieAPIService: MovieAPIServiceProtocol
     private lazy var nextPageNumber = startPage {
         didSet {
             if nextPageNumber == startPage { movies.removeAll() }
@@ -41,6 +41,12 @@ final class MovieListViewModel: MovieListViewModelProtocol {
         }
     }
 
+    // MARK: - Initialization
+
+    init(movieAPIService: MovieAPIServiceProtocol) {
+        self.movieAPIService = movieAPIService
+    }
+
     // MARK: - Public Methods
 
     func start() {
@@ -48,7 +54,7 @@ final class MovieListViewModel: MovieListViewModelProtocol {
         getMoviesPage(moviesCategories.getUrlString(page: startPage))
     }
 
-    func getMovies(title: String) {
+    func showMovies(title: String) {
         moviesCategories = MoviesCategories(rawValue: title) ?? .popular
     }
 

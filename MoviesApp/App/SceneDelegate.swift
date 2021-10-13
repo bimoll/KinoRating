@@ -6,9 +6,6 @@ import UIKit
 /// SceneDelegate
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
-    private lazy var navigationController = BaseNavigationController(
-        rootViewController: MoviesListViewController()
-    )
 
     func scene(
         _ scene: UIScene,
@@ -16,9 +13,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         options _: UIScene.ConnectionOptions
     ) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = navigationController
-        window?.backgroundColor = .black
-        window?.makeKeyAndVisible()
+        let window = UIWindow(windowScene: windowScene)
+        window.backgroundColor = .black
+        window.makeKeyAndVisible()
+        self.window = window
+
+        let applicationCoordinator = ApplicationCoordinator(assembly: Assembly())
+        applicationCoordinator.start()
     }
 }
