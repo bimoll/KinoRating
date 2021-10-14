@@ -3,8 +3,12 @@
 
 import UIKit
 
+protocol MoviesListViewControllerProtocol: UIViewController {
+    var toMovieDetail: IntHandler? { get set }
+}
+
 /// MoviesListViewController
-final class MoviesListViewController: UIViewController {
+final class MoviesListViewController: UIViewController, MoviesListViewControllerProtocol {
     private enum LocalConstants {
         static let identifierMovieCollectionViewCell = "MovieCollectionViewCell"
         static let identifierFooterView = "FooterView"
@@ -88,11 +92,27 @@ final class MoviesListViewController: UIViewController {
     private lazy var safeAreaGuide = view.safeAreaLayoutGuide
     private lazy var views: [UIView] = [moviesCollectionView, categoriesScrollView, searchTextField]
 
+    // MARK: - Public Properties
+
+    var toMovieDetail: IntHandler?
+
     // MARK: - Private Properties
 
-    private var viewModel: MovieListViewModelProtocol = MovieListViewModel()
+    private var viewModel: MovieListViewModelProtocol
     private var viewData: ViewData<[Movie]>? {
         didSet { fetchUpdates() }
+    }
+
+    // MARK: - Initialization
+
+    init(viewModel: MovieListViewModelProtocol) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     // MARK: - UIViewController(MoviesListViewController)
@@ -110,7 +130,7 @@ final class MoviesListViewController: UIViewController {
         guard let title = sender.titleLabel?.text else { return }
         navigationItem.title = "\(title) Movies"
         searchTextField.text = ""
-        viewModel.getMovies(title: title)
+        viewModel.showMovies(title: title)
 
         categoriesButtons.forEach { button in
             if button == sender {
@@ -268,8 +288,8 @@ extension MoviesListViewController: UICollectionViewDataSource {
 extension MoviesListViewController: UICollectionViewDelegate {
     func collectionView(_: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard case let .data(movies) = viewData else { return }
-        let movieDetailViewController = Assembly.createDetailMoviesModule(movies[indexPath.item].id)
-        navigationController?.pushViewController(movieDetailViewController, animated: true)
+        let movieID = movies[indexPath.item].id
+        toMovieDetail?(movieID)
     }
 }
 
