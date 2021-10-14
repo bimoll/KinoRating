@@ -21,7 +21,7 @@ extension BaseCoordinatorProtocol {
         guard !childCoordinators.isEmpty,
               let coordinator = coordinator
         else { return }
-        for (index, element) in childCoordinators.reversed().enumerated() where element === coordinator {
+        for (index, element) in childCoordinators.enumerated() where element === coordinator {
             childCoordinators.remove(at: index)
             break
         }
