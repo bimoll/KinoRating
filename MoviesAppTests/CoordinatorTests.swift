@@ -27,8 +27,15 @@ final class CoordinatorTests: XCTestCase {
         coordinator = nil
     }
 
-    func testValidPresentation() {
+    func testValidPresentationMovieList() {
         coordinator.start()
         XCTAssertTrue(mockNavigationController.presentedVC is MoviesListViewController)
+    }
+
+    func testValidPresentationDetailMovies() {
+        coordinator.start()
+        guard let moviesListVC = mockNavigationController.presentedVC as? MoviesListViewController else { return }
+        moviesListVC.toMovieDetail?(2)
+        XCTAssertTrue(mockNavigationController.presentedVC is MovieDetailViewController)
     }
 }
