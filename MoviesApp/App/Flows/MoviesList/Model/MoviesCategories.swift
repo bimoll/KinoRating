@@ -13,13 +13,13 @@ enum MoviesCategories: String, CaseIterable {
     func getUrlString(page: Int) -> String {
         switch self {
         case .popular:
-            return "\(Constants.popularMoviesURLString)\(page)"
+            return "\(URLConstants.popularMoviesURLString)\(page)"
         case .topRated:
-            return "\(Constants.topRatedMoviesURLString)\(page)"
+            return "\(URLConstants.topRatedMoviesURLString)\(page)"
         case .nowPlaying:
-            return "\(Constants.nowPlayingMoviesURLString)\(page)"
+            return "\(URLConstants.nowPlayingMoviesURLString)\(page)"
         case .uncoming:
-            return "\(Constants.upcomingMoviesURLString)\(page)"
+            return "\(URLConstants.upcomingMoviesURLString)\(page)"
         }
     }
 }

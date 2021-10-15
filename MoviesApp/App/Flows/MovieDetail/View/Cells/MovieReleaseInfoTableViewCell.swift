@@ -52,7 +52,7 @@ final class MovieReleaseInfoTableViewCell: UITableViewCell {
 
         guard let ganres = movieInfo?.genres else { return }
         var ganresString = ""
-        ganres.forEach { ganresString += "\n\($0.name ?? "без жанра")" }
+        ganres.forEach { ganresString += "\n\($0.name)" }
         ganresLabel.text = ganresString
 
         setupDurationImageViewConstraints()

@@ -1,20 +1,21 @@
-// CacheImageService.swift
+// CacheService.swift
 // Copyright © RoadMap. All rights reserved.
 
-import UIKit
+import Foundation
 
-protocol CacheImageServiceProtocol {
-    func saveImageToCache(path: String, image: UIImage)
-    func getCachedImage(path: String) -> UIImage?
+protocol CacheServiceProtocol {
+    func saveToCache(path: String, data: Data)
+    func getCachedData(path: String) -> Data?
 }
 
-final class CacheImageService: CacheImageServiceProtocol {
+final class CacheService: CacheServiceProtocol {
     // MARK: - Private Properties
 
     private let fileManager = FileManager.default
+    private let directoryName: String
 
     private lazy var pathName: String = {
-        let pathName = "images"
+        let pathName = directoryName
         guard let cacheDir = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first
         else { return pathName }
         let url = cacheDir.appendingPathComponent(pathName, isDirectory: true)
@@ -26,19 +27,23 @@ final class CacheImageService: CacheImageServiceProtocol {
         return pathName
     }()
 
-    // MARK: - Public Methods
+    // MARK: - Initialization
 
-    func saveImageToCache(path: String, image: UIImage) {
-        guard let filePath = getFilePath(path: path) else { return }
-
-        let date = image.pngData()
-
-        fileManager.createFile(atPath: filePath, contents: date, attributes: nil)
+    init(directoryName: String) {
+        self.directoryName = directoryName
     }
 
-    func getCachedImage(path: String) -> UIImage? {
+    // MARK: - Public Methods
+
+    func saveToCache(path: String, data: Data) {
+        guard let filePath = getFilePath(path: path) else { return }
+        fileManager.createFile(atPath: filePath, contents: data, attributes: nil)
+    }
+
+    func getCachedData(path: String) -> Data? {
         guard let fileName = getFilePath(path: path) else { return nil }
-        return UIImage(contentsOfFile: fileName)
+        let url = URL(fileURLWithPath: fileName)
+        return try? Data(contentsOf: url)
     }
 
     // MARK: - Private Methods

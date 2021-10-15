@@ -9,15 +9,20 @@ protocol AssemblyProtocol {
 }
 
 final class Assembly: AssemblyProtocol {
+    private let moviesAPIService = MovieAPIService()
+
     func createMovieListModule() -> MoviesListViewControllerProtocol {
-        let movieAPIService = MovieAPIService()
-        let viewModel = MovieListViewModel(movieAPIService: movieAPIService)
+        let viewModel = MovieListViewModel(movieAPIService: moviesAPIService)
         return MoviesListViewController(viewModel: viewModel)
     }
 
     func createDetailMoviesModule(_ movieID: Int?) -> UIViewController {
-        let moviesAPIService = MovieAPIService()
-        let viewModel = MovieDetailViewModel(movieID: movieID, moviesAPIService: moviesAPIService)
+        let repository = RealmReporitory<MovieInfo>()
+        let viewModel = MovieDetailViewModel(
+            movieID: movieID,
+            moviesAPIService: moviesAPIService,
+            repository: repository
+        )
         return MovieDetailViewController(viewModel)
     }
 }

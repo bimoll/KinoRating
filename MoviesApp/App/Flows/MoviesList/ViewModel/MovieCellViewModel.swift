@@ -28,15 +28,22 @@ final class MovieCellViewModel: MovieCellViewModelProtocol {
     // MARK: - Public Methods
 
     func showPosterImage(path: String?) {
-        imageService.getPhoto(path: path ?? "") { [weak self] image in
-            guard let self = self,
-                  let image = image
-            else {
-                self?.updateViewData?(.noData)
-                return
-            }
+        updateViewData?(.loading)
+        imageService.getImageData(path: path ?? "") { [weak self] result in
+            guard let self = self else { return }
 
-            self.updateViewData?(.data(image))
+            switch result {
+            case let .success(data):
+                guard let imageData = data,
+                      let image = UIImage(data: imageData)
+                else {
+                    self.updateViewData?(.noData)
+                    return
+                }
+                self.updateViewData?(.data(image))
+            case let .failure(error):
+                self.updateViewData?(.error(error))
+            }
         }
     }
 }

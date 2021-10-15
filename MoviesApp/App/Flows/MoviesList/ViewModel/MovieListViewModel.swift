@@ -61,7 +61,7 @@ final class MovieListViewModel: MovieListViewModelProtocol {
     func paginate() {
         if nextPageNumber == -1 { return }
         if let text = getSearchText?() {
-            getMoviesPage(Constants.getSearchMoviesURLString(page: nextPageNumber, searchedText: text))
+            getMoviesPage(URLConstants.getSearchMoviesURLString(page: nextPageNumber, searchedText: text))
         } else {
             getMoviesPage(moviesCategories.getUrlString(page: nextPageNumber))
         }
@@ -70,7 +70,7 @@ final class MovieListViewModel: MovieListViewModelProtocol {
     func searchMovies() {
         nextPageNumber = startPage
         if let text = getSearchText?() {
-            getMoviesPage(Constants.getSearchMoviesURLString(page: nextPageNumber, searchedText: text))
+            getMoviesPage(URLConstants.getSearchMoviesURLString(page: nextPageNumber, searchedText: text))
         } else {
             getMoviesPage(moviesCategories.getUrlString(page: startPage))
         }

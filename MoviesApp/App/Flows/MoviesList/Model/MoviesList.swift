@@ -2,17 +2,18 @@
 // Copyright © RoadMap. All rights reserved.
 
 import Foundation
+import RealmSwift
 
 // MARK: - MoviesListPage
 
 /// Страница с фильмами
-struct MoviesListPage: Codable {
+class MoviesListPage: Object, Codable {
     /// id страницы
-    let page: Int?
+    @objc dynamic var page = Int()
     /// Фильмы с данной страницы
-    let results: [Movie]?
+    var results = List<Movie>()
     /// Суммарное количество всех страниц
-    let totalPages: Int?
+    @objc dynamic var totalPages = Int()
 
     enum CodingKeys: String, CodingKey {
         case page, results
@@ -23,23 +24,29 @@ struct MoviesListPage: Codable {
 // MARK: - Movie
 
 /// Фильм
-struct Movie: Codable {
+class Movie: Object, Codable {
     /// id жанров
-    let genreIDS: [Int]?
+    var genreIDS: List<Int>?
     /// id фильма
-    let id: Int?
+    @objc dynamic var id = Int()
     /// Название фильма
-    let title: String?
+    @objc dynamic var title = String()
     /// Краткое описание фильма
-    let overview: String?
+    @objc dynamic var overview = String()
     /// URL изображения с постером фильма
-    let posterPath: String?
+    @objc dynamic var posterPath = String()
     /// Дата выхода фильма
-    let releaseDate: String?
+    @objc dynamic var releaseDate = String()
     /// Оценка фильма
-    let voteAverage: Double?
+    @objc dynamic var voteAverage = Double()
     /// Количество отзывов
-    let voteCount: Int?
+    @objc dynamic var voteCount = Int()
+    /// URL страницы
+    @objc dynamic var pageURL: String? = ""
+    /// Ключ - URL страницы
+    override class func primaryKey() -> String? {
+        "pageURL"
+    }
 
     enum CodingKeys: String, CodingKey {
         case overview, title, id

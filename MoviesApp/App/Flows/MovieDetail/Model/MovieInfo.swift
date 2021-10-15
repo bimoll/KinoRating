@@ -2,45 +2,52 @@
 // Copyright © RoadMap. All rights reserved.
 
 import Foundation
+import RealmSwift
 
 // MARK: - MovieInfo
 
 /// Детальная инфоромация о фильме
-struct MovieInfo: Codable {
+class MovieInfo: Object, Codable {
     /// постер  фильма
-    let backdropPath: String?
+    @objc dynamic var backdropPath = ""
     /// жанры
-    let genres: [Genre]?
+    var genres = List<Genre>()
     /// описание
-    let overview: String?
+    @objc dynamic var overview = ""
     /// показатель популярности
-    let popularity: Double?
+    @objc dynamic var popularity = 0.0
     /// дата выхода
-    let releaseDate: String?
+    @objc dynamic var releaseDate = ""
     /// продолжительность
-    let runtime: Int?
+    @objc dynamic var runtime = 0
     /// слоган
-    let tagline: String?
+    @objc dynamic var tagline = ""
     /// название
-    let title: String?
+    @objc dynamic var title = ""
     /// средняя оценка
-    let voteAverage: Double?
+    @objc dynamic var voteAverage = 0.0
     /// количество оценок
-    let voteCount: Int?
+    @objc dynamic var voteCount = 0
+    /// id фильма
+    @objc dynamic var id = Int()
 
     enum CodingKeys: String, CodingKey {
-        case genres, runtime, tagline, title, overview, popularity
+        case genres, runtime, tagline, title, overview, popularity, id
         case backdropPath = "backdrop_path"
         case releaseDate = "release_date"
         case voteAverage = "vote_average"
         case voteCount = "vote_count"
+    }
+
+    override class func primaryKey() -> String? {
+        "id"
     }
 }
 
 // MARK: - Genre
 
 /// Жанр
-struct Genre: Codable {
+class Genre: Object, Codable {
     /// название жанра
-    let name: String?
+    @objc dynamic var name = ""
 }

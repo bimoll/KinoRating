@@ -1,10 +1,10 @@
-// Constants.swift
+// URLConstants.swift
 // Copyright © RoadMap. All rights reserved.
 
 import Foundation
 
 /// Константы
-struct Constants {
+struct URLConstants {
     /// Путь к популярным фильмам (без номера страницы)
     static let popularMoviesURLString =
         "https://api.themoviedb.org/3/movie/popular?api_key=ca2442da30f5d867dc86276640670af8&language=ru&page="

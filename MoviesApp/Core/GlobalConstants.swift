@@ -5,6 +5,7 @@ import Foundation
 
 // Глобальные константы
 struct GlobalConstants {
+    static let imagesDirectoryName = "images"
     static let isRetryMessage = "Попробовать еще?"
     static let cancelString = "Закрыть"
     static let notNetworkMessage = "Нет подключения к интернету"
