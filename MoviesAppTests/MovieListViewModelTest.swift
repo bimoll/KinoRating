@@ -15,9 +15,7 @@ final class MovieListViewModelTest: XCTestCase {
             movieAPIService: mockMoviesAPIService,
             repository: mockRepository
         )
-
         viewState = nil
-
         movieListViewModel.updateViewData = { result in
             self.viewState = result
         }

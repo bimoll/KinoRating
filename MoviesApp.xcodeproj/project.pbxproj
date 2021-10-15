@@ -52,6 +52,7 @@
 		0098CDC02718C12700912797 /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = 0098CDBF2718C12700912797 /* Realm */; };
 		0098CDC22718C12700912797 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 0098CDC12718C12700912797 /* RealmSwift */; };
 		0098CDC4271973BA00912797 /* ImageAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0098CDC3271973BA00912797 /* ImageAPIService.swift */; };
+		00A56C02271A269F00A75FE1 /* MovieCellViewModelTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A56C01271A269F00A75FE1 /* MovieCellViewModelTest.swift */; };
 		00AD94B326B55033003CF3E6 /* UIViewController+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00AD94B226B55033003CF3E6 /* UIViewController+.swift */; };
 		00ADBB4627160335008A39A6 /* MovieDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00ADBB432715F5D0008A39A6 /* MovieDetailViewModel.swift */; };
 		00ADBB472716033A008A39A6 /* MovieDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00393AA026B2B3A4002C8E6C /* MovieDetailViewController.swift */; };
@@ -130,6 +131,7 @@
 		0098CDBA2718BB3200912797 /* Repository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Repository.swift; sourceTree = "<group>"; };
 		0098CDBC2718BE5600912797 /* RealmRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmRepository.swift; sourceTree = "<group>"; };
 		0098CDC3271973BA00912797 /* ImageAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageAPIService.swift; sourceTree = "<group>"; };
+		00A56C01271A269F00A75FE1 /* MovieCellViewModelTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieCellViewModelTest.swift; sourceTree = "<group>"; };
 		00AD94B226B55033003CF3E6 /* UIViewController+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+.swift"; sourceTree = "<group>"; };
 		00ADBB432715F5D0008A39A6 /* MovieDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDetailViewModel.swift; sourceTree = "<group>"; };
 		00ADBB4827162224008A39A6 /* Assembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Assembly.swift; sourceTree = "<group>"; };
@@ -288,6 +290,7 @@
 				006F74EF2719E20700BE9EBB /* CacheServiceTest.swift */,
 				006F74F32719EC4000BE9EBB /* MovieListViewModelTest.swift */,
 				006F74F72719FBE300BE9EBB /* AssemblyTest.swift */,
+				00A56C01271A269F00A75FE1 /* MovieCellViewModelTest.swift */,
 			);
 			path = MoviesAppTests;
 			sourceTree = "<group>";
@@ -632,6 +635,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				00A56C02271A269F00A75FE1 /* MovieCellViewModelTest.swift in Sources */,
 				000E8D1827175CE3000C6DE5 /* CoordinatorTests.swift in Sources */,
 				006F74FD271A01F900BE9EBB /* MockRepository.swift in Sources */,
 				006F74EE2719DB9200BE9EBB /* RealmRepositoryTest.swift in Sources */,

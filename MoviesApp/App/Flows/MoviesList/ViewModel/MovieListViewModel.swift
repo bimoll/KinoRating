@@ -80,7 +80,7 @@ final class MovieListViewModel: MovieListViewModelProtocol {
     }
 
     // MARK: - Private Methods
-    
+
     private func getMoviesPage(_ urlString: String) {
         guard let path = urlString.components(separatedBy: "/").last else { return }
         repository.get(predicate: NSPredicate(format: "pageURL CONTAINS %@", path)) { [weak self] result in
