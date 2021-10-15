@@ -1,6 +1,7 @@
 // MovieListViewModel.swift
 // Copyright © RoadMap. All rights reserved.
 
+import RealmSwift
 import UIKit
 
 protocol MovieListViewModelProtocol {
@@ -20,6 +21,8 @@ final class MovieListViewModel: MovieListViewModelProtocol {
 
     // MARK: - Private Properties
 
+    private var notificationToken: NotificationToken?
+    private let repository: Repository<Movie>
     private let startPage = 1
     private var movieAPIService: MovieAPIServiceProtocol
     private lazy var nextPageNumber = startPage {
@@ -43,7 +46,8 @@ final class MovieListViewModel: MovieListViewModelProtocol {
 
     // MARK: - Initialization
 
-    init(movieAPIService: MovieAPIServiceProtocol) {
+    init(movieAPIService: MovieAPIServiceProtocol, repository: Repository<Movie>) {
+        self.repository = repository
         self.movieAPIService = movieAPIService
     }
 
@@ -61,7 +65,7 @@ final class MovieListViewModel: MovieListViewModelProtocol {
     func paginate() {
         if nextPageNumber == -1 { return }
         if let text = getSearchText?() {
-            getMoviesPage(Constants.getSearchMoviesURLString(page: nextPageNumber, searchedText: text))
+            getMoviesPage(URLConstants.getSearchMoviesURLString(page: nextPageNumber, searchedText: text))
         } else {
             getMoviesPage(moviesCategories.getUrlString(page: nextPageNumber))
         }
@@ -70,7 +74,7 @@ final class MovieListViewModel: MovieListViewModelProtocol {
     func searchMovies() {
         nextPageNumber = startPage
         if let text = getSearchText?() {
-            getMoviesPage(Constants.getSearchMoviesURLString(page: nextPageNumber, searchedText: text))
+            getMoviesPage(URLConstants.getSearchMoviesURLString(page: nextPageNumber, searchedText: text))
         } else {
             getMoviesPage(moviesCategories.getUrlString(page: startPage))
         }
@@ -78,7 +82,25 @@ final class MovieListViewModel: MovieListViewModelProtocol {
 
     // MARK: - Private Methods
 
+    private func setupRealmNotification() {}
+
     private func getMoviesPage(_ urlString: String) {
+        guard let path = urlString.components(separatedBy: "/").last else { return }
+        repository.get(predicate: NSPredicate(format: "pageURL CONTAINS %@", path)) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case let .success(movies):
+                movies.isEmpty
+                    ? self.getMoviesFromNetwork(urlString: urlString)
+                    : self.movies.append(contentsOf: movies); self.nextPageNumber += 1
+            case let .failure(error):
+                self.updateViewData?(.error(error))
+            }
+        }
+    }
+
+    private func getMoviesFromNetwork(urlString: String) {
+        guard let path = urlString.components(separatedBy: "/").last else { return }
         movieAPIService.getDecodable(urlString: urlString, to: MoviesListPage.self) { [weak self] result in
             guard let self = self else { return }
             switch result {
@@ -87,6 +109,8 @@ final class MovieListViewModel: MovieListViewModelProtocol {
                     self.updateViewData?(.noData)
                     return
                 }
+                movies.forEach { $0.pageURL = "\(path)\($0.id)" }
+                self.repository.save(Array(movies))
                 self.movies.append(contentsOf: movies)
                 self.setNextPageNumber(page)
             case let .failure(error):
