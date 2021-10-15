@@ -92,7 +92,7 @@ final class MovieListViewModel: MovieListViewModelProtocol {
             case let .success(movies):
                 movies.isEmpty
                     ? self.getMoviesFromNetwork(urlString: urlString)
-                    : self.movies.append(contentsOf: movies)
+                    : self.movies.append(contentsOf: movies); self.nextPageNumber += 1
             case let .failure(error):
                 self.updateViewData?(.error(error))
             }
