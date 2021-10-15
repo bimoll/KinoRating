@@ -21,7 +21,6 @@ final class MovieListViewModel: MovieListViewModelProtocol {
 
     // MARK: - Private Properties
 
-    private var notificationToken: NotificationToken?
     private let repository: Repository<Movie>
     private let startPage = 1
     private var movieAPIService: MovieAPIServiceProtocol
@@ -81,9 +80,7 @@ final class MovieListViewModel: MovieListViewModelProtocol {
     }
 
     // MARK: - Private Methods
-
-    private func setupRealmNotification() {}
-
+    
     private func getMoviesPage(_ urlString: String) {
         guard let path = urlString.components(separatedBy: "/").last else { return }
         repository.get(predicate: NSPredicate(format: "pageURL CONTAINS %@", path)) { [weak self] result in
