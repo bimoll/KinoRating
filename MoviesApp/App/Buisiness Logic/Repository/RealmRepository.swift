@@ -2,6 +2,7 @@
 // Copyright © RoadMap. All rights reserved.
 
 import Foundation
+import Network
 import RealmSwift
 
 final class RealmReporitory<DomainModel: Object>: Repository<DomainModel> {
