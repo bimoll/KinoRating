@@ -59,7 +59,7 @@ final class MovieCollectionViewCell: UICollectionViewCell {
 
     func configureCell(movie: Movie) {
         updateCell()
-
+        accessibilityIdentifier = movie.title
         layer.cornerRadius = 10
         views.forEach { addSubview($0) }
         setupMoviePosterImageViewConstraints()

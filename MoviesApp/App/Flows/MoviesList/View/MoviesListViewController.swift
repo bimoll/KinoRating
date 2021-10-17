@@ -28,6 +28,7 @@ final class MoviesListViewController: UIViewController, MoviesListViewController
     private lazy var searchTextField: UISearchTextField = {
         let searchTextField = UISearchTextField()
         searchTextField.textColor = .white
+        searchTextField.accessibilityIdentifier = "SearchMovies"
         searchTextField.autocorrectionType = .no
         searchTextField.attributedPlaceholder = NSAttributedString(
             string: LocalConstants.searchTextFieldPlaceHolder,
@@ -47,6 +48,7 @@ final class MoviesListViewController: UIViewController, MoviesListViewController
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.delegate = self
         collectionView.dataSource = self
+        collectionView.accessibilityIdentifier = "MoviesCollection"
         collectionView.backgroundColor = .black
         collectionView.register(
             MovieCollectionViewCell.self,
@@ -66,8 +68,10 @@ final class MoviesListViewController: UIViewController, MoviesListViewController
 
     private lazy var categoriesButtons: [UIButton] = {
         var buttons: [UIButton] = []
-        MoviesCategories.allCases.forEach {
-            buttons.append(UIButton().createSegmentedControlButton(setTitle: $0.rawValue))
+        MoviesCategories.allCases.forEach { category in
+            let button = UIButton().createSegmentedControlButton(setTitle: category.rawValue)
+            button.accessibilityIdentifier = category.rawValue
+            buttons.append(button)
         }
         return buttons
     }()
@@ -82,6 +86,7 @@ final class MoviesListViewController: UIViewController, MoviesListViewController
 
     private lazy var categoriesStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: categoriesButtons)
+        stackView.accessibilityIdentifier = "CategoriesSwitch"
         stackView.backgroundColor = .black
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
@@ -202,6 +207,7 @@ final class MoviesListViewController: UIViewController, MoviesListViewController
 
     private func configureNavigationBar() {
         navigationItem.title = "Popular Movies"
+        navigationController?.navigationBar.accessibilityIdentifier = "NavigationMoviesList"
         navigationController?.navigationBar.barTintColor = .black
         navigationController?.navigationBar.backgroundColor = .black
         navigationController?.navigationBar
