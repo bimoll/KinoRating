@@ -43,7 +43,7 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "008B5614270DF39D0058E182"
+               BlueprintIdentifier = "000E8D1427175CE3000C6DE5"
                BuildableName = "MoviesAppTests.xctest"
                BlueprintName = "MoviesAppTests"
                ReferencedContainer = "container:MoviesApp.xcodeproj">
@@ -53,9 +53,29 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "00660BEC2711FD82002F5022"
+               BlueprintIdentifier = "0026CF7F2719C67300E2A8B7"
                BuildableName = "MoviesAppUITests.xctest"
                BlueprintName = "MoviesAppUITests"
+               ReferencedContainer = "container:MoviesApp.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "0026CF902719CD3700E2A8B7"
+               BuildableName = "MovieAppUITest&#x44b;.xctest"
+               BlueprintName = "MovieAppUITest&#x44b;"
+               ReferencedContainer = "container:MoviesApp.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "006F74DF2719D26000BE9EBB"
+               BuildableName = "MovieAppUITests.xctest"
+               BlueprintName = "MovieAppUITests"
                ReferencedContainer = "container:MoviesApp.xcodeproj">
             </BuildableReference>
          </TestableReference>
